@@ -1,5 +1,7 @@
+import uuid;
+
 class Entity:
-    id = "POO1"
+    id = uuid.uuid4();
 
     def __init__(self, type, name):
         self.type = type
@@ -13,4 +15,5 @@ class Relation:
 
 person1 = Entity('PERSON', 'Alex Cruz')
 relation1 = Relation('OWNS', 'P001', 'E001')
-print(person1.name)
+
+print(person1.id)
