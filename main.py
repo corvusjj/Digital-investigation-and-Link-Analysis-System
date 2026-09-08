@@ -1,11 +1,14 @@
 import uuid;
 
 class Entity:
-    id = uuid.uuid4();
-
     def __init__(self, type, name):
+        self._id = uuid.uuid4()
         self.type = type
         self.name = name
+
+    @property
+    def id(self):
+        return self._id
 
 class Relation:
     def __init__(self, type, source, target):
@@ -14,6 +17,8 @@ class Relation:
         self.target = target
 
 person1 = Entity('PERSON', 'Alex Cruz')
-relation1 = Relation('OWNS', 'P001', 'E001')
+person2 = Entity('PERSON', 'Stacy Ferrar')
+
+# relation1 = Relation('CONNECTED_TO', person1.id, person2.id)
 
 print(person1.id)
