@@ -1,14 +1,14 @@
-import uuid;
+from entities.people.person import Person
 
-class Entity:
-    def __init__(self, type, name):
-        self._id = uuid.uuid4()
-        self.type = type
-        self.name = name
+person = Person(
+    "John",
+    "John Cena",
+    "Can't see me",
+    "50",
+    ""
+)
 
-    @property
-    def id(self):
-        return self._id
+print(person.properties)
 
 class Relation:
     def __init__(self, type, source, target):
@@ -16,9 +16,7 @@ class Relation:
         self.source = source
         self.target = target
 
-person1 = Entity('PERSON', 'Alex Cruz')
-person2 = Entity('PERSON', 'Stacy Ferrar')
-
-# relation1 = Relation('CONNECTED_TO', person1.id, person2.id)
-
-print(person1.id)
+# common relations properties
+# create nodes factory - child classes
+# dictionaries/ list for storing nodes
+# mvc modules
