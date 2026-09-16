@@ -8,7 +8,7 @@ person = Person(
     ""
 )
 
-print(person.properties)
+print(person.date_created)
 
 class Relation:
     def __init__(self, type, source, target):
@@ -16,7 +16,7 @@ class Relation:
         self.source = source
         self.target = target
 
-# common relations properties
 # create nodes factory - child classes
+# common relations properties
 # dictionaries/ list for storing nodes
 # mvc modules
