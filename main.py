@@ -1,7 +1,14 @@
-from registry.entity_registry import ENTITY_REGISTRY
+from factories.entity_factory import EntityFactory
 
-entity_class = ENTITY_REGISTRY["PEOPLE"]["PERSON"]
-person = entity_class("John", "J Corbet", "the_guy", "16", "")
+person = EntityFactory.create(
+    "PEOPLE",
+    "PERSON",
+    "JOHN",
+    {"full_name": "John Corbet",
+      "alias": "programmer",
+      "age": 3,
+      "occupation": "student"}
+)
 
 print(person.properties)
 
@@ -11,7 +18,6 @@ class Relation:
         self.source = source
         self.target = target
 
-# create nodes factory - child classes
 # common relations properties
 # dictionaries/ list for storing nodes
 # mvc modules
