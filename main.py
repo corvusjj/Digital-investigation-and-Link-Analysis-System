@@ -1,14 +1,9 @@
-from entities.people import Person
+from registry.entity_registry import ENTITY_REGISTRY
 
-person = Person(
-    "John",
-    "John Cena",
-    "Can't see me",
-    "50",
-    ""
-)
+entity_class = ENTITY_REGISTRY["PEOPLE"]["PERSON"]
+person = entity_class("John", "J Corbet", "the_guy", "16", "")
 
-print(person.date_created)
+print(person.properties)
 
 class Relation:
     def __init__(self, type, source, target):
