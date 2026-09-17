@@ -1,4 +1,4 @@
-from entities.people.person import Person
+from entities.people import Person
 
 person = Person(
     "John",
