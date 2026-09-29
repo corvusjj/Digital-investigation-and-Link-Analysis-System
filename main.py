@@ -1,3 +1,5 @@
+import networkx as nx
+
 from factories.entity_factory import EntityFactory
 from factories.relation_factory import RelationFactory
 
@@ -21,6 +23,16 @@ person2 = EntityFactory.create(
       "occupation": "actor"}
 )
 
+person3 = EntityFactory.create(
+    "PEOPLE",
+    "PERSON",
+    "BRUCE",
+    {"full_name": "Bruce Dela Cruz",
+      "alias": "dark night",
+      "age": 42,
+      "occupation": "police officer"}
+)
+
 relation = RelationFactory.create(
     relation_type="IS ASSOCIATED",
     source_id = person1.entity_id,
@@ -28,6 +40,12 @@ relation = RelationFactory.create(
 )
 
 print(relation)
+
+graph = nx.DiGraph()
+
+graph.add_node(person1)
+graph.add_node(person2)
+graph.add_node(person3)
 
 # common relations properties
 # dictionaries/ list for storing nodes
