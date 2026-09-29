@@ -4,4 +4,5 @@ entities/base/__pycache__
 registry/__pycache__
 .vscode
 factories/__pycache__
+relations/__pycache__
 .venv
