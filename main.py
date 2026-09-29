@@ -1,6 +1,7 @@
 from factories.entity_factory import EntityFactory
+from factories.relation_factory import RelationFactory
 
-person = EntityFactory.create(
+person1 = EntityFactory.create(
     "PEOPLE",
     "PERSON",
     "JOHN",
@@ -10,14 +11,32 @@ person = EntityFactory.create(
       "occupation": "student"}
 )
 
-print(person.properties)
+person2 = EntityFactory.create(
+    "PEOPLE",
+    "PERSON",
+    "PETER",
+    {"full_name": "Peter Parker",
+      "alias": "spidey",
+      "age": 24,
+      "occupation": "actor"}
+)
 
-class Relation:
-    def __init__(self, type, source, target):
-        self.type = type
-        self.source = source
-        self.target = target
+relation = RelationFactory.create(
+    relation_type="IS ASSOCIATED",
+    source_id = person1.entity_id,
+    target_id = person2.entity_id
+)
+
+print(relation)
 
 # common relations properties
 # dictionaries/ list for storing nodes
 # mvc modules
+
+# relation confidence
+# properties={
+#         "date": "2026-09-15",
+#         "source": "Vehicle Registry",
+#         "confidence": "HIGH",
+#         "notes": "Registered owner"
+#     }
