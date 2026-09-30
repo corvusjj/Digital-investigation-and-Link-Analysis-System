@@ -1,4 +1,7 @@
 import sys
+
+from database.database import Database
+
 from PyQt6.QtWidgets import (
     QApplication, 
     QMainWindow,
@@ -57,6 +60,9 @@ investigation_graph.add_entity(person2)
 investigation_graph.add_relation(relation1)
 
 print(investigation_graph.graph.nodes)
+
+database = Database()
+database.initialize()
 
 class MainWindow(QMainWindow):
     def __init__(self):
