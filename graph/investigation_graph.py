@@ -6,7 +6,13 @@ class InvestigationGraph:
         self.graph = nx.DiGraph()
 
     def add_entity(self, entity):
-        self.graph.add_node(entity)
+        self.graph.add_node(
+            entity.entity_id,
+            entity_type = entity.type,
+            entity_label = entity.label,
+            date_created = entity.date_created,
+            properties = entity.properties
+        )
 
     def add_relation(self, relation):
         self.graph.add_edge(
