@@ -1,31 +1,97 @@
+/* ==============================
+   MAIN WINDOW
+   ============================== */
+
 QMainWindow {
-    background-color: #1e1e1e;
+    background-color: #181a1f;
 }
 
-QListWidget {
-    background-color: #252526;
-    color: #ffffff;
-    border: none;
-    padding: 10px;
+
+/* ==============================
+   GENERAL WIDGETS
+   ============================== */
+
+QWidget {
+    color: #e6e6e6;
+    font-family: "Segoe UI";
+    font-size: 14px;
 }
 
-QLabel {
-    color: #ffffff;
-    font-size: 18px;
+
+/* ==============================
+   SECTION TITLE
+   ============================== */
+
+QLabel#sectionTitle {
+    color: #8b949e;
+    font-size: 12px;
+    font-weight: bold;
 }
 
-QPushButton {
-    background-color: #333333;
-    color: #ffffff;
-    border: none;
-    padding: 10px 18px;
+
+/* ==============================
+   CASE LIST
+   ============================== */
+
+QListWidget#caseList {
+    background-color: #20232a;
+    border: 1px solid #30343b;
+    border-radius: 8px;
+    padding: 6px;
+    outline: none;
+}
+
+QListWidget#caseList::item {
+    padding: 14px;
     border-radius: 6px;
 }
 
-QPushButton:hover {
-    background-color: #444444;
+QListWidget#caseList::item:hover {
+    background-color: #2a2e36;
 }
 
-QPushButton:pressed {
-    background-color: #222222;
+QListWidget#caseList::item:selected {
+    background-color: #343a46;
+    color: white;
+}
+
+
+/* ==============================
+   CASE TITLE
+   ============================== */
+
+QLabel#caseTitle {
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+QLabel#caseDescription {
+    color: #9da4ad;
+    font-size: 15px;
+}
+
+
+/* ==============================
+   PRIMARY BUTTON
+   ============================== */
+
+QPushButton#primaryButton {
+    background-color: #3b82f6;
+    color: white;
+
+    border: none;
+    border-radius: 7px;
+
+    padding: 12px 18px;
+
+    font-weight: bold;
+}
+
+QPushButton#primaryButton:hover {
+    background-color: #2563eb;
+}
+
+QPushButton#primaryButton:pressed {
+    background-color: #1d4ed8;
 }

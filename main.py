@@ -1,17 +1,9 @@
 import sys
 
-from database.database import Database
+from PyQt6.QtWidgets import QApplication
 
-from PyQt6.QtWidgets import (
-    QApplication, 
-    QMainWindow,
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QListWidget,
-    QPushButton,
-    QLabel
-)
+from database.database import Database
+from ui.main_window import MainWindow
 
 from factories.entity_factory import EntityFactory
 from factories.relation_factory import RelationFactory
@@ -61,57 +53,23 @@ investigation_graph.add_relation(relation1)
 
 print(investigation_graph.graph.nodes)
 
-database = Database()
-database.initialize()
+def main():
+    database = Database()
+    database.initialize()
 
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
+    app = QApplication(sys.argv)
 
-        self.setWindowTitle("Digital Investigation and Link Analysis System")
-        self.resize(1200, 800)
+    with open("ui/styles.qss", "r") as file:
+        app.setStyleSheet(file.read())
 
-        #Main container
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
+    window = MainWindow(database)
+    window.show()
 
-        #Main layout
-        main_layout = QHBoxLayout()
-        central_widget.setLayout(main_layout)
+    sys.exit(app.exec())
 
-        #Entity list
-        self.entity_list = QListWidget()
 
-        #Buttons
-        self.add_button = QPushButton("Add")
-        self.edit_button = QPushButton("Edit")
-        self.delete_button = QPushButton("Delete")
-
-        #Right side
-        self.entity_title = QLabel("Select an entity")
-
-        button_layout = QHBoxLayout()
-        button_layout.addWidget(self.add_button)
-        button_layout.addWidget(self.edit_button)
-        button_layout.addWidget(self.delete_button)
-
-        right_layout = QVBoxLayout()
-        right_layout.addWidget(self.entity_title)
-        right_layout.addLayout(button_layout)
-
-        #Main layout
-        main_layout.addWidget(self.entity_list)
-        main_layout.addLayout(right_layout)
-
-app = QApplication(sys.argv)
-
-with open("ui/styles.qss", "r") as file:
-    app.setStyleSheet(file.read())
-
-window = MainWindow()
-window.show()
-
-sys.exit(app.exec())
+if __name__ == "__main__":
+    main()
 
 # ui module
 # common relations properties
