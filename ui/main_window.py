@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import (
     QPushButton
 )
 
+from ui.case_form import CaseForm
 
 class MainWindow(QMainWindow):
     def __init__(self, database):
@@ -42,6 +43,9 @@ class MainWindow(QMainWindow):
 
         self.new_case_button = QPushButton("+  Create New Case")
         self.new_case_button.setObjectName("primaryButton")
+        self.new_case_button.clicked.connect(
+            self.open_case_form
+        )
 
         left_layout.addWidget(cases_label)
         left_layout.addWidget(self.case_list)
@@ -74,6 +78,15 @@ class MainWindow(QMainWindow):
 
         main_layout.addLayout(left_layout, 1)
         main_layout.addLayout(right_layout, 2)
+
+    def open_case_form(self):
+        dialog = CaseForm(
+            database=self.database,
+            parent=self
+    )
+
+        if dialog.exec():
+            self.load_cases()
 
     def load_cases(self):
         self.case_list.clear()

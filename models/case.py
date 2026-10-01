@@ -14,7 +14,7 @@ class Case:
         date_closed = None,
         date_created = None
     ):
-        self.case_id = case_id or str(uuid.uuid())
+        self.case_id = case_id or str(uuid.uuid4())
 
         self.case_name = case_name
         self.case_type = case_type
