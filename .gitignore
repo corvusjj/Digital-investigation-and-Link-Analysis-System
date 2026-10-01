@@ -6,4 +6,6 @@ registry/__pycache__
 factories/__pycache__
 relations/__pycache__
 database/__pycache__
+ui/__pycache__
+models/__pycache__
 .venv
