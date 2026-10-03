@@ -6,7 +6,8 @@ from PyQt6.QtWidgets import (
     QLabel,
     QListWidget,
     QListWidgetItem,
-    QPushButton
+    QPushButton,
+    QMessageBox
 )
 
 from ui.case_form import CaseForm
@@ -133,6 +134,14 @@ class MainWindow(QMainWindow):
             self.display_case
         )
 
+        self.edit_case_button.clicked.connect(
+            self.edit_case
+        )
+
+        self.delete_case_button.clicked.connect(
+            self.delete_case
+        )
+
     # =========================================
     # LOAD CASES
     # =========================================
@@ -161,52 +170,12 @@ class MainWindow(QMainWindow):
     def display_case(self, item):
         case_id = item.data(1)
 
-        cases = self.database.get_cases()
-
-        selected_case = None
-
-        for case in cases:
-            if case.case_id == case_id:
-                selected_case = case
-                break
-
-        if selected_case is None:
+        case = self.database.get_case(case_id)
+    
+        if case is None:
             return
-
-        self.case_title.setText(
-            selected_case.case_name
-        )
-
-        self.case_type.setText(
-            selected_case.case_type
-        )
-
-        self.case_description.setText(
-            selected_case.description
-            or "No description provided."
-        )
-
-        self.case_status.setText(
-            f"Status: {selected_case.status}"
-        )
-
-        self.case_investigator.setText(
-            f"Investigator: "
-            f"{selected_case.investigator or 'Not specified'}"
-        )
-
-        self.case_date_opened.setText(
-            f"Date Opened: "
-            f"{selected_case.date_opened}"
-        )
-
-        self.case_id.setText(
-            f"Case ID: {selected_case.case_id}"
-        )
-
-        self.open_case_button.setEnabled(True)
-        self.edit_case_button.setEnabled(True)
-        self.delete_case_button.setEnabled(True)
+    
+        self.show_case_details(case)
 
     # =========================================
     # CREATE CASE
@@ -220,3 +189,117 @@ class MainWindow(QMainWindow):
 
         if dialog.exec():
             self.load_cases()
+
+    # =========================================
+    # EDIT CASE
+    # =========================================
+
+    def edit_case(self):
+        current_item = self.case_list.currentItem()
+
+        if current_item is None:
+            return
+
+        case_id = current_item.data(1)
+        case = self.database.get_case(case_id)
+
+        if case is None:
+            return
+
+        dialog = CaseForm(
+            database=self.database,
+            case=case,
+            parent=self
+        )
+
+        if dialog.exec():
+            self.load_cases()
+
+            updated_case = self.database.get_case(case_id)
+
+            if updated_case:
+                self.show_case_details(updated_case)
+
+    def delete_case(self):
+        current_item = self.case_list.currentItem()
+
+        if current_item is None:
+            return
+
+        case_id = current_item.data(1)
+
+        case = self.database.get_case(case_id)
+
+        if case is None:
+            return
+
+        result = QMessageBox.question(
+            self,
+            "Delete Case",
+            (
+                f"Are you sure you want to delete "
+                f"'{case.case_name}'?"
+            ),
+            QMessageBox.StandardButton.Yes
+            | QMessageBox.StandardButton.No
+        )
+
+        if result == QMessageBox.StandardButton.Yes:
+            self.database.delete_case(case_id)
+
+            self.clear_case_details()
+            self.load_cases()
+
+    def clear_case_details(self):
+        self.case_title.setText("Select a case")
+        self.case_type.setText("")
+
+        self.case_description.setText(
+            "Select an existing case "
+            "or create a new investigation."
+        )
+
+        self.case_status.setText("")
+        self.case_investigator.setText("")
+        self.case_date_opened.setText("")
+        self.case_id.setText("")
+
+        self.open_case_button.setEnabled(False)
+        self.edit_case_button.setEnabled(False)
+        self.delete_case_button.setEnabled(False)
+
+    def show_case_details(self, case):
+        self.case_title.setText(
+            case.case_name
+        )
+
+        self.case_type.setText(
+            case.case_type
+        )
+
+        self.case_description.setText(
+            case.description
+            or "No description provided."
+        )
+
+        self.case_status.setText(
+            f"Status: {case.status}"
+        )
+
+        self.case_investigator.setText(
+            f"Investigator: "
+            f"{case.investigator or 'Not specified'}"
+        )
+
+        self.case_date_opened.setText(
+            f"Date Opened: "
+            f"{case.date_opened}"
+        )
+
+        self.case_id.setText(
+            f"Case ID: {case.case_id}"
+        )
+
+        self.open_case_button.setEnabled(True)
+        self.edit_case_button.setEnabled(True)
+        self.delete_case_button.setEnabled(True)    

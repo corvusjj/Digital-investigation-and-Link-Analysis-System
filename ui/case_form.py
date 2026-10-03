@@ -14,15 +14,23 @@ from models.case import Case
 
 
 class CaseForm(QDialog):
-    def __init__(self, database, parent=None):
+    def __init__(self, database, case=None, parent=None):
         super().__init__(parent)
 
         self.database = database
+        self.case = case
 
-        self.setWindowTitle("Create New Case")
+        if self.case:
+            self.setWindowTitle("Edit Case")
+        else:
+            self.setWindowTitle("Create New Case")
+
         self.setMinimumWidth(500)
 
         self.setup_ui()
+
+        if self.case:
+            self.load_case()
 
     def setup_ui(self):
         main_layout = QVBoxLayout()
@@ -86,7 +94,12 @@ class CaseForm(QDialog):
         self.cancel_button = QPushButton("Cancel")
         self.cancel_button.setObjectName("secondaryButton")
 
-        self.create_button = QPushButton("Create Case")
+        if self.case:
+            self.create_button = QPushButton("Save Changes")
+        else:
+            self.create_button = QPushButton("Create Case")
+
+        self.create_button.setObjectName("primaryButton")
         self.create_button.setObjectName("primaryButton")
 
         button_layout = QHBoxLayout()
@@ -102,9 +115,9 @@ class CaseForm(QDialog):
 
         # Signals
         self.cancel_button.clicked.connect(self.reject)
-        self.create_button.clicked.connect(self.create_case)
+        self.create_button.clicked.connect(self.save_case)
 
-    def create_case(self):
+    def save_case(self):
         case_name = self.case_name_input.text().strip()
         case_type = self.case_type_input.currentText()
         description = self.description_input.toPlainText().strip()
@@ -118,14 +131,47 @@ class CaseForm(QDialog):
             )
             return
 
-        case = Case(
-            case_name=case_name,
-            case_type=case_type,
-            description=description,
-            investigator=investigator
-        )
+        if self.case:
+            # UPDATE EXISTING CASE
 
-        self.database.create_case(case)
+            self.case.case_name = case_name
+            self.case.case_type = case_type
+            self.case.description = description
+            self.case.investigator = investigator
+
+            self.database.update_case(self.case)
+
+        else:
+            # CREATE NEW CASE
+
+            case = Case(
+                case_name=case_name,
+                case_type=case_type,
+                description=description,
+                investigator=investigator
+            )
+
+            self.database.create_case(case)
 
         self.accept()
+
+    def load_case(self):
+        self.case_name_input.setText(
+            self.case.case_name
+        )
+
+        index = self.case_type_input.findText(
+            self.case.case_type
+        )
+
+        if index >= 0:
+            self.case_type_input.setCurrentIndex(index)
+
+        self.description_input.setPlainText(
+            self.case.description
+        )
+
+        self.investigator_input.setText(
+            self.case.investigator
+        )
     
