@@ -102,3 +102,83 @@ class Database:
             cases.append(case)
 
         return cases
+
+    def get_case(self, case_id):
+        connection = self.connect()
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            SELECT
+                case_id,
+                case_name,
+                case_type,
+                description,
+                date_opened,
+                date_closed,
+                status,
+                investigator,
+                date_created
+            FROM cases
+            WHERE case_id = ?
+        """, (case_id,))
+
+        row = cursor.fetchone()
+
+        connection.close()
+
+        if row is None:
+            return None
+
+        return Case(
+            case_id=row[0],
+            case_name=row[1],
+            case_type=row[2],
+            description=row[3],
+            date_opened=row[4],
+            date_closed=row[5],
+            status=row[6],
+            investigator=row[7],
+            date_created=row[8]
+        )
+
+    def update_case(self, case):
+        connection = self.connect()
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            UPDATE cases
+            SET
+                case_name = ?,
+                case_type = ?,
+                description = ?,
+                date_opened = ?,
+                date_closed = ?,
+                status = ?,
+                investigator = ?
+            WHERE case_id = ?
+        """, (
+            case.case_name,
+            case.case_type,
+            case.description,
+            case.date_opened,
+            case.date_closed,
+            case.status,
+            case.investigator,
+            case.case_id
+        ))
+
+        connection.commit()
+        connection.close()
+
+    def delete_case(self, case_id):
+        connection = self.connect()
+        cursor = connection.cursor()
+    
+        cursor.execute("""
+            DELETE FROM cases
+            WHERE case_id = ?
+        """, (case_id,))
+    
+        connection.commit()
+        connection.close()
+
