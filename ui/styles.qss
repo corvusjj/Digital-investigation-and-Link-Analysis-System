@@ -159,3 +159,64 @@ QPushButton#secondaryButton:hover {
 QPushButton#secondaryButton:pressed {
     background-color: #22252b;
 }
+
+/* ==============================
+   CASE DETAILS
+   ============================== */
+
+QLabel#caseType {
+    color: #8b949e;
+    font-size: 14px;
+}
+
+QLabel#caseDescription {
+    color: #b8bec7;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+QLabel#caseStatus {
+    color: #6ee7b7;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+QLabel#caseInfo {
+    color: #9da4ad;
+    font-size: 14px;
+}
+
+QLabel#caseId {
+    color: #636b76;
+    font-size: 12px;
+}
+
+
+/* ==============================
+   DANGER BUTTON
+   ============================== */
+
+QPushButton#dangerButton {
+    background-color: #7f1d1d;
+    color: white;
+
+    border: none;
+    border-radius: 7px;
+
+    padding: 10px 18px;
+}
+
+QPushButton#dangerButton:hover {
+    background-color: #991b1b;
+}
+
+QPushButton#dangerButton:pressed {
+    background-color: #651414;
+}
+
+QPushButton#dangerButton:disabled,
+QPushButton#secondaryButton:disabled,
+QPushButton#primaryButton:disabled {
+    background-color: #292c32;
+    color: #5f6670;
+}
