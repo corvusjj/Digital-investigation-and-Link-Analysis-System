@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import (
 )
 
 from ui.case_form import CaseForm
-
+from ui.investigation_window import InvestigationWindow
 
 class MainWindow(QMainWindow):
     def __init__(self, database):
@@ -140,6 +140,10 @@ class MainWindow(QMainWindow):
 
         self.delete_case_button.clicked.connect(
             self.delete_case
+        )
+
+        self.open_case_button.clicked.connect(
+            self.open_investigation
         )
 
     # =========================================
@@ -303,3 +307,25 @@ class MainWindow(QMainWindow):
         self.open_case_button.setEnabled(True)
         self.edit_case_button.setEnabled(True)
         self.delete_case_button.setEnabled(True)    
+
+    def open_investigation(self):
+        current_item = self.case_list.currentItem()
+
+        if current_item is None:
+            return
+
+        case_id = current_item.data(1)
+
+        case = self.database.get_case(case_id)
+
+        if case is None:
+            return
+
+        self.investigation_window = InvestigationWindow(
+            database=self.database,
+            case=case,
+            parent=self
+        )
+
+        self.investigation_window.show()
+        self.hide()

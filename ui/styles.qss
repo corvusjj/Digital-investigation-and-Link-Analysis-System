@@ -220,3 +220,98 @@ QPushButton#primaryButton:disabled {
     background-color: #292c32;
     color: #5f6670;
 }
+
+/* =================================
+   INVESTIGATION WORKSPACE
+   ================================= */
+
+QWidget#sidebar {
+    background-color: #15171c;
+
+    border-right: 1px solid #30343b;
+}
+
+QLabel#workspaceCaseName {
+    color: white;
+
+    font-size: 18px;
+    font-weight: bold;
+}
+
+QLabel#workspaceCaseId {
+    color: #636b76;
+
+    font-size: 11px;
+}
+
+/* =================================
+   NAVIGATION
+   ================================= */
+
+QPushButton#navigationButton {
+    background-color: transparent;
+
+    color: #9da4ad;
+
+    border: none;
+    border-radius: 7px;
+
+    text-align: left;
+
+    padding: 12px 15px;
+
+    font-size: 14px;
+}
+
+QPushButton#navigationButton:hover {
+    background-color: #252930;
+
+    color: white;
+}
+
+QPushButton#navigationButton:pressed {
+    background-color: #30343c;
+}
+
+
+/* =================================
+   BACK BUTTON
+   ================================= */
+
+QPushButton#backButton {
+    background-color: #20232a;
+
+    color: #9da4ad;
+
+    border: 1px solid #30343b;
+    border-radius: 7px;
+
+    padding: 10px;
+}
+
+QPushButton#backButton:hover {
+    background-color: #2a2e36;
+
+    color: white;
+}
+
+/* =================================
+   WORKSPACE CONTENT
+   ================================= */
+
+QWidget#workspaceContent {
+    background-color: #181a1f;
+}
+
+QLabel#pageTitle {
+    color: white;
+
+    font-size: 28px;
+    font-weight: bold;
+}
+
+QLabel#pageDescription {
+    color: #8b949e;
+
+    font-size: 14px;
+}
