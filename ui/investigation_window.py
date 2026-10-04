@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QPushButton,
     QStackedWidget,
+    QListWidget
 )
 
 
@@ -160,9 +161,13 @@ class InvestigationWindow(QMainWindow):
 
     def create_entities_page(self):
         page = QWidget()
-
         layout = QVBoxLayout()
         page.setLayout(layout)
+
+        # Header
+        header_layout = QHBoxLayout()
+
+        title_layout = QVBoxLayout()
 
         title = QLabel("Entities")
         title.setObjectName("pageTitle")
@@ -172,8 +177,40 @@ class InvestigationWindow(QMainWindow):
         )
         description.setObjectName("pageDescription")
 
-        layout.addWidget(title)
-        layout.addWidget(description)
+        title_layout.addWidget(title)
+        title_layout.addWidget(description)
+
+        self.add_entity_button = QPushButton("+ Add Entity")
+        self.add_entity_button.setObjectName("primaryButton")
+
+        header_layout.addLayout(title_layout)
+        header_layout.addStretch()
+        header_layout.addWidget(self.add_entity_button)
+
+        layout.addLayout(header_layout)
+
+        # Entity list
+        self.entity_list = QListWidget()
+        self.entity_list.setObjectName("entityList")
+
+        layout.addWidget(self.entity_list)
+
+        # Bottom buttons
+        button_layout = QHBoxLayout()
+
+        self.edit_entity_button = QPushButton("Edit")
+        self.edit_entity_button.setObjectName("secondaryButton")
+        self.edit_entity_button.setEnabled(False)
+
+        self.delete_entity_button = QPushButton("Delete")
+        self.delete_entity_button.setObjectName("dangerButton")
+        self.delete_entity_button.setEnabled(False)
+
+        button_layout.addStretch()
+        button_layout.addWidget(self.edit_entity_button)
+        button_layout.addWidget(self.delete_entity_button)
+
+        layout.addLayout(button_layout)
 
         return page
 
