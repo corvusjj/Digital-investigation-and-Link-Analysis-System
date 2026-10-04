@@ -10,6 +10,7 @@ from PyQt6.QtWidgets import (
     QListWidgetItem
 )
 
+from ui.entity_form import EntityForm
 
 class InvestigationWindow(QMainWindow):
     def __init__(self, database, case, parent=None):
@@ -153,12 +154,16 @@ class InvestigationWindow(QMainWindow):
             lambda: self.content_stack.setCurrentIndex(2)
         )
 
-        self.back_button.clicked.connect(
-            self.back_to_cases
-        )
-
         self.entity_list.itemClicked.connect(
             self.select_entity
+        )
+
+        self.add_entity_button.clicked.connect(
+            self.open_entity_form
+        )
+
+        self.back_button.clicked.connect(
+            self.back_to_cases
         )
 
     def load_entities(self):
@@ -189,6 +194,16 @@ class InvestigationWindow(QMainWindow):
 
         self.edit_entity_button.setEnabled(True)
         self.delete_entity_button.setEnabled(True)
+
+    def open_entity_form(self):
+        dialog = EntityForm(
+            database=self.database,
+            case_id=self.case.case_id,
+            parent=self
+        )
+    
+        if dialog.exec():
+            self.load_entities()
 
     # =========================================
     # ENTITIES PAGE
