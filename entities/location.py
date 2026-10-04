@@ -18,8 +18,6 @@ class Location(Entity):
             "description": description
         }
 
-from entities.base.entity import Entity
-
 class Address(Entity):
     def __init__(
             self,
