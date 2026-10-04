@@ -1,4 +1,5 @@
 import sqlite3
+import json
 from models.case import Case
 
 class Database:
@@ -23,6 +24,22 @@ class Database:
                 status TEXT,
                 investigator TEXT,
                 date_created TEXT NOT NULL
+            )
+        """)
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS entities (
+                entity_id TEXT PRIMARY KEY,
+                case_id TEXT NOT NULL,
+                category TEXT NOT NULL,
+                entity_type TEXT NOT NULL,
+                label TEXT NOT NULL,
+                properties TEXT,
+                date_created TEXT NOT NULL,
+
+                FOREIGN KEY (case_id)
+                REFERENCES cases(case_id)
+                ON DELETE CASCADE
             )
         """)
 
@@ -182,3 +199,111 @@ class Database:
         connection.commit()
         connection.close()
 
+    def create_entity(self, entity, case_id, category):
+        connection = self.connect()
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            INSERT INTO entities (
+                entity_id,
+                case_id,
+                category,
+                entity_type,
+                label,
+                properties,
+                date_created
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (
+            entity.entity_id,
+            case_id,
+            category,
+            entity.type,
+            entity.label,
+            json.dumps(entity.properties),
+            entity.date_created.isoformat()
+        ))
+
+        connection.commit()
+        connection.close()
+
+    def get_entities(self, case_id):
+        connection = self.connect()
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            SELECT
+                entity_id,
+                case_id,
+                category,
+                entity_type,
+                label,
+                properties,
+                date_created
+            FROM entities
+            WHERE case_id = ?
+            ORDER BY date_created DESC
+        """, (case_id,))
+
+        rows = cursor.fetchall()
+        connection.close()
+
+        entities = []
+
+        for row in rows:
+            entities.append({
+                "entity_id": row[0],
+                "case_id": row[1],
+                "category": row[2],
+                "entity_type": row[3],
+                "label": row[4],
+                "properties": json.loads(row[5]) if row[5] else {},
+                "date_created": row[6]
+            })
+
+        return entities
+
+    def get_entity(self, entity_id):
+        connection = self.connect()
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            SELECT
+                entity_id,
+                case_id,
+                category,
+                entity_type,
+                label,
+                properties,
+                date_created
+            FROM entities
+            WHERE entity_id = ?
+        """, (entity_id,))
+
+        row = cursor.fetchone()
+        connection.close()
+
+        if row is None:
+            return None
+
+        return {
+            "entity_id": row[0],
+            "case_id": row[1],
+            "category": row[2],
+            "entity_type": row[3],
+            "label": row[4],
+            "properties": json.loads(row[5]) if row[5] else {},
+            "date_created": row[6]
+        }
+
+    def delete_entity(self, entity_id):
+        connection = self.connect()
+        cursor = connection.cursor()
+    
+        cursor.execute("""
+            DELETE FROM entities
+            WHERE entity_id = ?
+        """, (entity_id,))
+    
+        connection.commit()
+        connection.close()
