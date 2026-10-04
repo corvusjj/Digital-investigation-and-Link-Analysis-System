@@ -6,7 +6,8 @@ from PyQt6.QtWidgets import (
     QLabel,
     QPushButton,
     QStackedWidget,
-    QListWidget
+    QListWidget,
+    QListWidgetItem
 )
 
 
@@ -23,6 +24,7 @@ class InvestigationWindow(QMainWindow):
 
         self.resize(1400, 850)
         self.setup_ui()
+        self.load_entities()
 
     def setup_ui(self):
         central_widget = QWidget()
@@ -154,6 +156,39 @@ class InvestigationWindow(QMainWindow):
         self.back_button.clicked.connect(
             self.back_to_cases
         )
+
+        self.entity_list.itemClicked.connect(
+            self.select_entity
+        )
+
+    def load_entities(self):
+        self.entity_list.clear()
+
+        entities = self.database.get_entities(
+            self.case.case_id
+        )
+
+        for entity in entities:
+            item = QListWidgetItem(
+                f"{entity['entity_type']}    •    "
+                f"{entity['label']}    •    "
+                f"{entity['date_created']}"
+            )
+
+            item.setData(1, entity["entity_id"])
+
+            self.entity_list.addItem(item)
+
+    def select_entity(self, item):
+        entity_id = item.data(1)
+
+        entity = self.database.get_entity(entity_id)
+
+        if entity is None:
+            return
+
+        self.edit_entity_button.setEnabled(True)
+        self.delete_entity_button.setEnabled(True)
 
     # =========================================
     # ENTITIES PAGE

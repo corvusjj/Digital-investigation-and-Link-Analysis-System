@@ -54,7 +54,6 @@ investigation_graph.add_entity(person1)
 investigation_graph.add_entity(person2)
 investigation_graph.add_relation(relation1)
 
-print(investigation_graph.graph.nodes)
 
 def main():
     database = Database()
