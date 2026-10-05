@@ -10,7 +10,8 @@ from PyQt6.QtWidgets import (
     QListWidgetItem,
     QMessageBox,
     QFrame,
-    QFormLayout
+    QFormLayout,
+    QComboBox
 )
 
 from ui.entity_form import EntityForm
@@ -35,6 +36,7 @@ class InvestigationWindow(QMainWindow):
         self.setup_ui()
         self.load_entities()
         self.load_relationships()
+        self.load_path_entities()
         self.build_graph()
 
     def setup_ui(self):
@@ -238,6 +240,7 @@ class InvestigationWindow(QMainWindow):
 
         if dialog.exec():
             self.load_entities()
+            self.load_path_entities()
             self.build_graph()
 
     def edit_entity(self):
@@ -265,6 +268,7 @@ class InvestigationWindow(QMainWindow):
 
         if dialog.exec():
             self.load_entities()
+            self.load_path_entities()
             self.build_graph()
 
     def delete_entity(self):
@@ -302,6 +306,7 @@ class InvestigationWindow(QMainWindow):
         )
     
         self.load_entities()
+        self.load_path_entities()
         self.build_graph()
     
         self.edit_entity_button.setEnabled(False)
@@ -574,6 +579,30 @@ class InvestigationWindow(QMainWindow):
         layout = QVBoxLayout()
         page.setLayout(layout)
 
+         # =========================================
+        # PATH-ANALYSIS TOOLBAR
+        # =========================================
+
+        self.path_source_combo = QComboBox()
+
+        self.path_source_combo.setObjectName(
+            "pathCombo"
+        )
+
+        self.path_target_combo = QComboBox()
+
+        self.path_target_combo.setObjectName(
+            "pathCombo"
+        )
+
+        self.find_path_button = QPushButton(
+            "Find Path"
+        )
+
+        self.find_path_button.setObjectName(
+            "primaryButton"
+        )
+
         # =========================================
         # HEADER
         # =========================================
@@ -660,6 +689,46 @@ class InvestigationWindow(QMainWindow):
 
         layout.addLayout(header_layout)
 
+        path_layout = QHBoxLayout()
+
+        path_label = QLabel(
+            "Path Analysis:"
+        )
+
+        path_label.setObjectName(
+            "formSectionTitle"
+        )
+
+        path_layout.addWidget(
+            path_label
+        )
+
+        path_layout.addWidget(
+            QLabel("Start")
+        )
+
+        path_layout.addWidget(
+            self.path_source_combo
+        )
+
+        path_layout.addWidget(
+            QLabel("Target")
+        )
+
+        path_layout.addWidget(
+            self.path_target_combo
+        )
+
+        path_layout.addWidget(
+            self.find_path_button
+        )
+
+        path_layout.addStretch()
+
+        layout.addLayout(
+            path_layout
+        )
+
         # =========================================
         # GRAPH VIEW
         # =========================================
@@ -724,6 +793,10 @@ class InvestigationWindow(QMainWindow):
 
         self.clear_focus_button.clicked.connect(
             self.graph_view.clear_highlighting
+        )
+
+        self.find_path_button.clicked.connect(
+            self.find_entity_path
         )
 
         return page
@@ -1076,6 +1149,82 @@ class InvestigationWindow(QMainWindow):
             self.details_connections.addItem(
                 "No connections."
             )
+
+    def load_path_entities(self):
+
+        self.path_source_combo.clear()
+        self.path_target_combo.clear()
+
+        entities = self.database.get_entities(
+            self.case.case_id
+        )
+
+        for entity in entities:
+
+            display_text = (
+                f"{entity['entity_type']}  •  "
+                f"{entity['label']}"
+            )
+
+            self.path_source_combo.addItem(
+                display_text,
+                entity["entity_id"]
+            )
+
+            self.path_target_combo.addItem(
+                display_text,
+                entity["entity_id"]
+            )
+
+    def find_entity_path(self):
+        source_id = (
+            self.path_source_combo.currentData()
+        )
+
+        target_id = (
+            self.path_target_combo.currentData()
+        )
+
+        if source_id is None:
+            return
+
+        if target_id is None:
+            return
+
+        if source_id == target_id:
+
+            QMessageBox.information(
+                self,
+                "Path Analysis",
+                "Start and target entities "
+                "are the same."
+            )
+
+            return
+
+        path = self.investigation_graph.find_path(
+            source_id,
+            target_id
+        )
+
+        if path is None:
+
+            QMessageBox.information(
+                self,
+                "No Path Found",
+                "No connection could be found "
+                "between the selected entities."
+            )
+
+            return
+
+        self.graph_view.highlight_path(
+            path
+        )
+
+        self.graph_view.center_path(
+            path
+        )
 
     def back_to_cases(self):
         self.parent().show()

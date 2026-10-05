@@ -40,3 +40,21 @@ class InvestigationGraph:
 
     def get_edges(self):
         return self.graph.edges(data=True)
+
+    def find_path(
+        self,
+        source_id,
+        target_id
+    ):
+        try:
+            return nx.shortest_path(
+                self.graph,
+                source=source_id,
+                target=target_id
+            )
+
+        except nx.NetworkXNoPath:
+            return None
+
+        except nx.NodeNotFound:
+            return None

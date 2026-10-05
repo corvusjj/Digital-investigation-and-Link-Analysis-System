@@ -95,18 +95,14 @@ class GraphView(QGraphicsView):
     def build_graph(self):
 
         self.clear_graph()
-
         graph = self.investigation_graph.get_graph()
 
         if graph.number_of_nodes() == 0:
             return
 
         self.create_nodes(graph)
-
         self.create_edges(graph)
-
         self.layout_nodes(graph)
-
         self.fit_graph()
 
     # --------------------------------------------------
@@ -400,4 +396,100 @@ class GraphView(QGraphicsView):
         for edge in self.edges:
 
             edge.set_highlighted(False)
-            edge.set_dimmed(False)               
+            edge.set_dimmed(False)
+
+    def highlight_path(
+        self,
+        path
+    ):
+
+        # =========================================
+        # RESET
+        # =========================================
+
+        for node in self.nodes.values():
+
+            node.set_highlighted(False)
+            node.set_dimmed(True)
+
+        for edge in self.edges:
+
+            edge.set_highlighted(False)
+            edge.set_dimmed(True)
+
+        # =========================================
+        # HIGHLIGHT PATH NODES
+        # =========================================
+
+        for entity_id in path:
+
+            node = self.nodes.get(
+                entity_id
+            )
+
+            if node is None:
+                continue
+
+            node.set_dimmed(False)
+            node.set_highlighted(True)
+
+        # =========================================
+        # HIGHLIGHT PATH EDGES
+        # =========================================
+
+        path_pairs = set(
+            zip(
+                path,
+                path[1:]
+            )
+        )
+
+        for edge in self.edges:
+
+            pair = (
+                edge.source_node.entity_id,
+                edge.target_node.entity_id
+            )
+
+            if pair in path_pairs:
+
+                edge.set_dimmed(False)
+                edge.set_highlighted(True)
+
+    def center_path(
+        self,
+        path
+    ):
+
+        nodes = []
+
+        for entity_id in path:
+
+            node = self.nodes.get(
+                entity_id
+            )
+
+            if node is not None:
+                nodes.append(node)
+
+        if not nodes:
+            return
+
+        first_node = nodes[0]
+        last_node = nodes[-1]
+
+        center_x = (
+            first_node.scenePos().x()
+            + last_node.scenePos().x()
+        ) / 2
+
+        center_y = (
+            first_node.scenePos().y()
+            + last_node.scenePos().y()
+        ) / 2
+
+        self.centerOn(
+            center_x,
+            center_y
+        )        
+       
