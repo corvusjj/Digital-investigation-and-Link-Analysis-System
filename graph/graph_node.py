@@ -14,8 +14,8 @@ from PyQt6.QtWidgets import (
 
 class GraphNode(QGraphicsRectItem):
 
-    WIDTH = 180
-    HEIGHT = 90
+    WIDTH = 200
+    HEIGHT = 100
 
     def __init__(
         self,
@@ -71,42 +71,60 @@ class GraphNode(QGraphicsRectItem):
 
     def setup_text(self):
 
+        # -----------------------------------------
         # Entity type
+        # -----------------------------------------
+
         self.type_text = QGraphicsTextItem(
             self.entity_type,
             self
         )
 
         self.type_text.setFont(
-            QFont("Arial", 8, QFont.Weight.Bold)
+            QFont(
+                "Arial",
+                8,
+                QFont.Weight.Bold
+            )
         )
 
         self.type_text.setDefaultTextColor(
-            Qt.GlobalColor.lightGray
+            QColor("#9ca3af")
         )
 
         self.type_text.setPos(
-            12,
+            16,
             10
         )
 
+        # -----------------------------------------
         # Entity label
+        # -----------------------------------------
+
         self.label_text = QGraphicsTextItem(
             self.label,
             self
         )
 
         self.label_text.setFont(
-            QFont("Arial", 12, QFont.Weight.Bold)
+            QFont(
+                "Arial",
+                12,
+                QFont.Weight.Bold
+            )
         )
 
         self.label_text.setDefaultTextColor(
-            Qt.GlobalColor.white
+            QColor("#f9fafb")
         )
 
         self.label_text.setPos(
-            12,
-            32
+            16,
+            34
+        )
+
+        self.label_text.setTextWidth(
+            self.WIDTH - 32
         )
 
     def paint(
@@ -165,10 +183,10 @@ class GraphNode(QGraphicsRectItem):
         painter.drawRoundedRect(
             0,
             0,
-            5,
+            4,
             self.HEIGHT,
-            3,
-            3
+            2,
+            2
         )
 
         # -----------------------------------------
