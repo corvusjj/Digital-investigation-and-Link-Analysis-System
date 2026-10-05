@@ -316,46 +316,43 @@ class GraphView(QGraphicsView):
     ):
 
         # =========================================
-        # RESET EVERYTHING
+        # RESET GRAPH
         # =========================================
-    
+
         for node in self.nodes.values():
-        
-            node.set_highlighted(
-                False
-            )
-    
+
+            node.set_highlighted(False)
+            node.set_dimmed(True)
+
         for edge in self.edges:
-        
-            edge.set_highlighted(
-                False
-            )
-    
+
+            edge.set_highlighted(False)
+            edge.set_dimmed(True)
+
         # =========================================
         # FIND SELECTED NODE
         # =========================================
-    
+
         selected_node = self.nodes.get(
             entity_id
         )
-    
+
         if selected_node is None:
             return
-    
+
         # =========================================
-        # HIGHLIGHT SELECTED NODE
+        # SELECTED NODE
         # =========================================
-    
-        selected_node.set_highlighted(
-            True
-        )
-    
+
+        selected_node.set_dimmed(False)
+
+        selected_node.set_highlighted(True)
+
         # =========================================
-        # HIGHLIGHT CONNECTED NODES + EDGES
+        # CONNECTED NODES
         # =========================================
-    
+
         for edge in self.edges:
-        
             if (
                 edge.source_node
                 is selected_node
@@ -363,25 +360,44 @@ class GraphView(QGraphicsView):
                 edge.target_node
                 is selected_node
             ):
-    
-                edge.set_highlighted(
-                    True
-                )
-    
+
+                edge.set_dimmed(False)
+
+                edge.set_highlighted(True)
+
                 if (
                     edge.source_node
                     is not selected_node
                 ):
-    
+
+                    edge.source_node.set_dimmed(
+                        False
+                    )
+
                     edge.source_node.set_highlighted(
                         True
                     )
-    
+
                 if (
                     edge.target_node
                     is not selected_node
                 ):
-    
+
+                    edge.target_node.set_dimmed(
+                        False
+                    )
+
                     edge.target_node.set_highlighted(
                         True
                     )
+
+    def clear_highlighting(self):
+        for node in self.nodes.values():
+
+            node.set_highlighted(False)
+            node.set_dimmed(False)
+
+        for edge in self.edges:
+
+            edge.set_highlighted(False)
+            edge.set_dimmed(False)               

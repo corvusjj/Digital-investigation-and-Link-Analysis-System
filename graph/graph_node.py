@@ -46,8 +46,8 @@ class GraphNode(QGraphicsRectItem):
         self.category = category
 
         self.edges = []
-
         self.highlighted = False
+        self.dimmed = False
 
         self.setFlag(
             QGraphicsItem.GraphicsItemFlag.ItemIsMovable,
@@ -138,6 +138,36 @@ class GraphNode(QGraphicsRectItem):
             self.WIDTH - 32
         )
 
+        self.update_text_visibility()
+
+    def update_text_visibility(self):
+
+        if self.dimmed:
+            text_color = QColor(
+                "#555b66"
+            )
+
+            type_color = QColor(
+                "#4b515c"
+            )
+
+        else:
+            text_color = QColor(
+                "#f9fafb"
+            )
+
+            type_color = QColor(
+                "#9ca3af"
+            )
+
+        self.label_text.setDefaultTextColor(
+            text_color
+        )
+
+        self.type_text.setDefaultTextColor(
+            type_color
+        )
+
     def paint(
         self,
         painter,
@@ -176,6 +206,18 @@ class GraphNode(QGraphicsRectItem):
             border_color = self.get_category_color()
     
             border_width = 2
+
+        elif self.dimmed:
+
+            background_color = QColor(
+                "#15171b"
+            )
+
+            border_color = QColor(
+                "#25282e"
+            )
+
+            border_width = 1
     
         else:
         
@@ -289,8 +331,11 @@ class GraphNode(QGraphicsRectItem):
         super().mousePressEvent(event)
 
     def set_highlighted(self, highlighted):
-
         self.highlighted = highlighted
+        self.update()
 
+    def set_dimmed(self, dimmed):
+        self.dimmed = dimmed
+        self.update_text_visibility()
         self.update()
     

@@ -8,6 +8,7 @@ from PyQt6.QtGui import (
     QPainter,
     QPen,
     QPolygonF,
+    QColor
 )
 from PyQt6.QtWidgets import (
     QGraphicsItem,
@@ -31,6 +32,7 @@ class GraphEdge(QGraphicsLineItem):
         self.relation_type = relation_type
 
         self.highlighted = False
+        self.dimmed = False
 
         self.setZValue(-1)
 
@@ -222,6 +224,11 @@ class GraphEdge(QGraphicsLineItem):
                 Qt.GlobalColor.lightGray,
                 3
             )
+        elif self.dimmed:
+            pen = QPen(
+                QColor("#25282e"),
+                1
+            )
         else:
 
             pen = QPen(
@@ -322,7 +329,9 @@ class GraphEdge(QGraphicsLineItem):
         )
 
     def set_highlighted(self, highlighted):
-
         self.highlighted = highlighted
+        self.update()
 
+    def set_dimmed(self, dimmed):
+        self.dimmed = dimmed
         self.update()

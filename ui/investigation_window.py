@@ -634,6 +634,14 @@ class InvestigationWindow(QMainWindow):
             "secondaryButton"
         )
 
+        self.clear_focus_button = QPushButton(
+            "Clear Focus"
+        )
+
+        self.clear_focus_button.setObjectName(
+            "secondaryButton"
+        )
+
         header_layout.addWidget(
             self.fit_graph_button
         )
@@ -712,6 +720,10 @@ class InvestigationWindow(QMainWindow):
 
         self.reset_layout_button.clicked.connect(
             self.reset_graph_layout
+        )
+
+        self.clear_focus_button.clicked.connect(
+            self.graph_view.clear_highlighting
         )
 
         return page
