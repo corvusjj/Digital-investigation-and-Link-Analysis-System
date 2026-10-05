@@ -27,6 +27,7 @@ class InvestigationWindow(QMainWindow):
         self.resize(1400, 850)
         self.setup_ui()
         self.load_entities()
+        self.load_relationships()
 
     def setup_ui(self):
         central_widget = QWidget()
@@ -171,6 +172,10 @@ class InvestigationWindow(QMainWindow):
             self.delete_entity
         )
 
+        self.relationship_list.itemClicked.connect(
+            self.select_relationship
+        )
+
         self.back_button.clicked.connect(
             self.back_to_cases
         )
@@ -279,6 +284,51 @@ class InvestigationWindow(QMainWindow):
         self.edit_entity_button.setEnabled(False)
         self.delete_entity_button.setEnabled(False)
 
+    def load_relationships(self):
+        self.relationship_list.clear()
+
+        relationships = self.database.get_relations(
+            self.case.case_id
+        )
+
+        for relation in relationships:
+            source = self.database.get_entity(
+                relation["source_id"]
+            )
+
+            target = self.database.get_entity(
+                relation["target_id"]
+            )
+
+            if source is None or target is None:
+                continue
+
+            item = QListWidgetItem(
+                f"{source['label']}    "
+                f"→  {relation['relation_type']}  →    "
+                f"{target['label']}"
+            )
+
+            item.setData(
+                1,
+                relation["relation_id"]
+            )
+
+            self.relationship_list.addItem(item)
+
+    def select_relationship(self, item):
+        relation_id = item.data(1)
+    
+        relation = self.database.get_relation(
+            relation_id
+        )
+    
+        if relation is None:
+            return
+    
+        self.edit_relation_button.setEnabled(True)
+        self.delete_relation_button.setEnabled(True)
+
     # =========================================
     # ENTITIES PAGE
     # =========================================
@@ -344,20 +394,56 @@ class InvestigationWindow(QMainWindow):
 
     def create_relationships_page(self):
         page = QWidget()
-
         layout = QVBoxLayout()
         page.setLayout(layout)
+
+        # Header
+        header_layout = QHBoxLayout()
+
+        title_layout = QVBoxLayout()
 
         title = QLabel("Relationships")
         title.setObjectName("pageTitle")
 
         description = QLabel(
-            "Manage relationships between investigation entities."
+            "Manage the relationships between entities in this investigation."
         )
         description.setObjectName("pageDescription")
 
-        layout.addWidget(title)
-        layout.addWidget(description)
+        title_layout.addWidget(title)
+        title_layout.addWidget(description)
+
+        self.add_relation_button = QPushButton("+ Add Relationship")
+        self.add_relation_button.setObjectName("primaryButton")
+
+        header_layout.addLayout(title_layout)
+        header_layout.addStretch()
+        header_layout.addWidget(self.add_relation_button)
+
+        layout.addLayout(header_layout)
+
+        # Relationship list
+        self.relationship_list = QListWidget()
+        self.relationship_list.setObjectName("relationshipList")
+
+        layout.addWidget(self.relationship_list)
+
+        # Bottom buttons
+        button_layout = QHBoxLayout()
+
+        self.edit_relation_button = QPushButton("Edit")
+        self.edit_relation_button.setObjectName("secondaryButton")
+        self.edit_relation_button.setEnabled(False)
+
+        self.delete_relation_button = QPushButton("Delete")
+        self.delete_relation_button.setObjectName("dangerButton")
+        self.delete_relation_button.setEnabled(False)
+
+        button_layout.addStretch()
+        button_layout.addWidget(self.edit_relation_button)
+        button_layout.addWidget(self.delete_relation_button)
+
+        layout.addLayout(button_layout)
 
         return page
 

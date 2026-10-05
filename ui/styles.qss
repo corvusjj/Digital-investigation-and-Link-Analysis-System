@@ -341,3 +341,29 @@ QListWidget#entityList::item:selected {
     background-color: #343a46;
     color: white;
 }
+
+/* =================================
+   RELATIONSHIP LIST
+   ================================= */
+
+QListWidget#relationshipList {
+    background-color: #20232a;
+    border: 1px solid #30343b;
+    border-radius: 8px;
+    padding: 6px;
+    outline: none;
+}
+
+QListWidget#relationshipList::item {
+    padding: 14px;
+    border-radius: 6px;
+}
+
+QListWidget#relationshipList::item:hover {
+    background-color: #2a2e36;
+}
+
+QListWidget#relationshipList::item:selected {
+    background-color: #343a46;
+    color: white;
+}
