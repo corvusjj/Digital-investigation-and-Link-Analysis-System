@@ -1,5 +1,10 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QBrush, QPen, QFont
+from PyQt6.QtGui import (
+    QBrush,
+    QPen,
+    QFont,
+    QColor,
+)
 from PyQt6.QtWidgets import (
     QGraphicsItem,
     QGraphicsRectItem,
@@ -116,16 +121,19 @@ class GraphNode(QGraphicsRectItem):
 
         rect = self.rect()
 
-        # Main card
+        # -----------------------------------------
+        # Node background
+        # -----------------------------------------
+
         painter.setBrush(
             QBrush(
-                Qt.GlobalColor.darkGray
+                QColor("#20232a")
             )
         )
 
         painter.setPen(
             QPen(
-                Qt.GlobalColor.gray,
+                QColor("#3a3f4b"),
                 1
             )
         )
@@ -136,12 +144,46 @@ class GraphNode(QGraphicsRectItem):
             10
         )
 
-        # Selection border
+        # -----------------------------------------
+        # Category accent
+        # -----------------------------------------
+
+        accent_color = self.get_category_color()
+
+        painter.setBrush(
+            QBrush(
+                accent_color
+            )
+        )
+
+        painter.setPen(
+            QPen(
+                Qt.PenStyle.NoPen
+            )
+        )
+
+        painter.drawRoundedRect(
+            0,
+            0,
+            5,
+            self.HEIGHT,
+            3,
+            3
+        )
+
+        # -----------------------------------------
+        # Selection
+        # -----------------------------------------
+
         if self.isSelected():
+
+            painter.setBrush(
+                Qt.BrushStyle.NoBrush
+            )
 
             painter.setPen(
                 QPen(
-                    Qt.GlobalColor.white,
+                    QColor("#ffffff"),
                     2
                 )
             )
@@ -157,23 +199,43 @@ class GraphNode(QGraphicsRectItem):
                 10
             )
 
+    def get_category_color(self):
+
+        colors = {
+            "PEOPLE": "#4f8cff",
+            "DIGITAL IDENTITY": "#a56cff",
+            "COMPUTING": "#22c55e",
+            "COMMUNICATION": "#f59e0b",
+            "LOCATION": "#ef4444",
+            "CRIMINAL": "#dc2626",
+            "FINANCIAL": "#14b8a6",
+            "OTHER": "#6b7280",
+        }
+
+        return QColor(
+            colors.get(
+                self.category,
+                "#6b7280"
+            )
+        )
+
     def itemChange(self, change, value):
 
         result = super().itemChange(
             change,
             value
         )
-    
+
         if (
             change
             == QGraphicsItem.GraphicsItemChange.ItemPositionHasChanged
         ):
-    
+
             for edge in getattr(
                 self,
                 "edges",
                 []
             ):
                 edge.update_position()
-    
+
         return result
