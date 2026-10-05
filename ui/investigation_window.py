@@ -920,6 +920,10 @@ class InvestigationWindow(QMainWindow):
             entity_id
         )
 
+        self.graph_view.highlight_entity(
+            entity_id
+        )
+
     def show_entity_details(
         self,
         entity_id

@@ -297,8 +297,91 @@ class GraphView(QGraphicsView):
             1 / 1.2
         )
 
-    def entity_selected(self, entity_id):
+    def entity_selected(
+        self,
+        entity_id
+    ):
 
+        self.highlight_entity(
+            entity_id
+        )
+    
         self.entity_selected_signal.emit(
             entity_id
         )
+
+    def highlight_entity(
+        self,
+        entity_id
+    ):
+
+        # =========================================
+        # RESET EVERYTHING
+        # =========================================
+    
+        for node in self.nodes.values():
+        
+            node.set_highlighted(
+                False
+            )
+    
+        for edge in self.edges:
+        
+            edge.set_highlighted(
+                False
+            )
+    
+        # =========================================
+        # FIND SELECTED NODE
+        # =========================================
+    
+        selected_node = self.nodes.get(
+            entity_id
+        )
+    
+        if selected_node is None:
+            return
+    
+        # =========================================
+        # HIGHLIGHT SELECTED NODE
+        # =========================================
+    
+        selected_node.set_highlighted(
+            True
+        )
+    
+        # =========================================
+        # HIGHLIGHT CONNECTED NODES + EDGES
+        # =========================================
+    
+        for edge in self.edges:
+        
+            if (
+                edge.source_node
+                is selected_node
+                or
+                edge.target_node
+                is selected_node
+            ):
+    
+                edge.set_highlighted(
+                    True
+                )
+    
+                if (
+                    edge.source_node
+                    is not selected_node
+                ):
+    
+                    edge.source_node.set_highlighted(
+                        True
+                    )
+    
+                if (
+                    edge.target_node
+                    is not selected_node
+                ):
+    
+                    edge.target_node.set_highlighted(
+                        True
+                    )

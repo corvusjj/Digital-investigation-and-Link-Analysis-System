@@ -47,6 +47,8 @@ class GraphNode(QGraphicsRectItem):
 
         self.edges = []
 
+        self.highlighted = False
+
         self.setFlag(
             QGraphicsItem.GraphicsItemFlag.ItemIsMovable,
             True
@@ -142,53 +144,88 @@ class GraphNode(QGraphicsRectItem):
         option,
         widget=None
     ):
+
         painter.setRenderHint(
             painter.RenderHint.Antialiasing
         )
-
+    
         rect = self.rect()
-
-        # -----------------------------------------
-        # Node background
-        # -----------------------------------------
-
+    
+        # =========================================
+        # NODE BACKGROUND
+        # =========================================
+    
+        if self.isSelected():
+        
+            background_color = QColor(
+                "#343a46"
+            )
+    
+            border_color = QColor(
+                "#ffffff"
+            )
+    
+            border_width = 2
+    
+        elif self.highlighted:
+        
+            background_color = QColor(
+                "#2a2e36"
+            )
+    
+            border_color = self.get_category_color()
+    
+            border_width = 2
+    
+        else:
+        
+            background_color = QColor(
+                "#20232a"
+            )
+    
+            border_color = QColor(
+                "#3a3f4b"
+            )
+    
+            border_width = 1
+    
         painter.setBrush(
             QBrush(
-                QColor("#20232a")
+                background_color
             )
         )
-
+    
         painter.setPen(
             QPen(
-                QColor("#3a3f4b"),
-                1
+                border_color,
+                border_width
             )
         )
-
+    
         painter.drawRoundedRect(
             rect,
             10,
             10
         )
-
-        # -----------------------------------------
-        # Category accent
-        # -----------------------------------------
-
+    
+        # =========================================
+        # CATEGORY ACCENT
+        # =========================================
+    
         accent_color = self.get_category_color()
-
+    
         painter.setBrush(
             QBrush(
                 accent_color
             )
         )
-
+    
         painter.setPen(
             QPen(
                 Qt.PenStyle.NoPen
             )
         )
-
+    
         painter.drawRoundedRect(
             0,
             0,
@@ -197,34 +234,6 @@ class GraphNode(QGraphicsRectItem):
             2,
             2
         )
-
-        # -----------------------------------------
-        # Selection
-        # -----------------------------------------
-
-        if self.isSelected():
-
-            painter.setBrush(
-                Qt.BrushStyle.NoBrush
-            )
-
-            painter.setPen(
-                QPen(
-                    QColor("#ffffff"),
-                    2
-                )
-            )
-
-            painter.drawRoundedRect(
-                rect.adjusted(
-                    1,
-                    1,
-                    -1,
-                    -1
-                ),
-                10,
-                10
-            )
 
     def get_category_color(self):
 
@@ -278,4 +287,10 @@ class GraphNode(QGraphicsRectItem):
             )
 
         super().mousePressEvent(event)
+
+    def set_highlighted(self, highlighted):
+
+        self.highlighted = highlighted
+
+        self.update()
     

@@ -30,6 +30,8 @@ class GraphEdge(QGraphicsLineItem):
         self.target_node = target_node
         self.relation_type = relation_type
 
+        self.highlighted = False
+
         self.setZValue(-1)
 
         self.setFlag(
@@ -214,13 +216,19 @@ class GraphEdge(QGraphicsLineItem):
                 Qt.GlobalColor.white,
                 3
             )
+        elif self.highlighted:
 
+            pen = QPen(
+                Qt.GlobalColor.lightGray,
+                3
+            )
         else:
 
             pen = QPen(
                 Qt.GlobalColor.gray,
                 2
             )
+
 
         painter.setPen(pen)
 
@@ -312,3 +320,9 @@ class GraphEdge(QGraphicsLineItem):
             change,
             value
         )
+
+    def set_highlighted(self, highlighted):
+
+        self.highlighted = highlighted
+
+        self.update()
