@@ -7,7 +7,8 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QStackedWidget,
     QListWidget,
-    QListWidgetItem
+    QListWidgetItem,
+    QMessageBox
 )
 
 from ui.entity_form import EntityForm
@@ -162,6 +163,14 @@ class InvestigationWindow(QMainWindow):
             self.open_entity_form
         )
 
+        self.edit_entity_button.clicked.connect(
+            self.edit_entity
+        )
+
+        self.delete_entity_button.clicked.connect(
+            self.delete_entity
+        )
+
         self.back_button.clicked.connect(
             self.back_to_cases
         )
@@ -201,9 +210,74 @@ class InvestigationWindow(QMainWindow):
             case_id=self.case.case_id,
             parent=self
         )
-    
+
         if dialog.exec():
             self.load_entities()
+
+    def edit_entity(self):
+
+        current_item = self.entity_list.currentItem()
+
+        if current_item is None:
+            return
+
+        entity_id = current_item.data(1)
+
+        entity = self.database.get_entity(
+            entity_id
+        )
+
+        if entity is None:
+            return
+
+        dialog = EntityForm(
+            database=self.database,
+            case_id=self.case.case_id,
+            entity=entity,
+            parent=self
+        )
+
+        if dialog.exec():
+            self.load_entities()
+
+    def delete_entity(self):
+
+        current_item = self.entity_list.currentItem()
+    
+        if current_item is None:
+            return
+    
+        entity_id = current_item.data(1)
+    
+        entity = self.database.get_entity(
+            entity_id
+        )
+    
+        if entity is None:
+            return
+    
+        result = QMessageBox.question(
+            self,
+            "Delete Entity",
+            (
+                f"Are you sure you want to delete "
+                f"'{entity['label']}'?"
+            ),
+            QMessageBox.StandardButton.Yes
+            | QMessageBox.StandardButton.No
+        )
+    
+        if result != QMessageBox.StandardButton.Yes:
+            return
+    
+        self.database.delete_entity(
+            entity_id
+        )
+    
+        self.load_entities()
+    
+        self.edit_entity_button.setEnabled(False)
+        self.delete_entity_button.setEnabled(False)
 
     # =========================================
     # ENTITIES PAGE

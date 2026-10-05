@@ -18,11 +18,12 @@ from factories.entity_factory import EntityFactory
 
 class EntityForm(QDialog):
 
-    def __init__(self, database, case_id, parent=None):
+    def __init__(self, database, case_id, entity=None, parent=None):
         super().__init__(parent)
 
         self.database = database
         self.case_id = case_id
+        self.entity = entity
 
         self.property_inputs = {}
 
@@ -44,7 +45,12 @@ class EntityForm(QDialog):
         # Title
         # -----------------------------
 
-        title = QLabel("Add Entity")
+        title = QLabel(
+            "Edit the entity associated with this investigation."
+            if self.entity
+            else
+            "Create an entity for this investigation."
+        )
         title.setObjectName("formTitle")
 
         description = QLabel(
@@ -135,7 +141,7 @@ class EntityForm(QDialog):
         )
 
         self.create_button = QPushButton(
-            "Create Entity"
+            "Save Changes" if self.entity else "Create Entity"
         )
 
         self.create_button.setObjectName(
@@ -178,9 +184,12 @@ class EntityForm(QDialog):
         # Initial population
         # -----------------------------
 
-        self.category_changed(
-            self.category_combo.currentText()
-        )
+        if self.entity:
+            self.load_entity()
+        else:
+            self.category_changed(
+                self.category_combo.currentText()
+            )
 
     # --------------------------------------------------
     # Category changed
@@ -350,28 +359,94 @@ class EntityForm(QDialog):
 
         try:
 
-            entity = EntityFactory.create(
-                category,
-                entity_type,
-                label,
-                properties
-            )
+            if self.entity is None:
 
-            self.database.create_entity(
-                entity,
-                self.case_id,
-                category
-            )
+                # Create new entity
+                entity = EntityFactory.create(
+                    category,
+                    entity_type,
+                    label,
+                    properties
+                )
+
+                self.database.create_entity(
+                    entity,
+                    self.case_id,
+                    category
+                )
+
+            else:
+
+                # Update existing entity
+                entity = EntityFactory.create(
+                    category,
+                    entity_type,
+                    label,
+                    properties
+                )
+    
+                # Preserve the existing identity
+                entity.entity_id = self.entity["entity_id"]
+    
+                self.database.update_entity(
+                    entity,
+                    category
+                )
 
         except Exception as error:
 
             QMessageBox.critical(
                 self,
                 "Error",
-                f"Could not create entity:\n\n"
-                f"{error}"
+                f"Could not save entity:\n\n{error}"
             )
 
             return
 
         self.accept()
+
+    def load_entity(self):
+
+        category = self.entity["category"]
+        entity_type = self.entity["entity_type"]
+
+        category_index = (
+            self.category_combo.findText(category)
+        )
+    
+        if category_index >= 0:
+            self.category_combo.setCurrentIndex(
+                category_index
+            )
+    
+        self.category_changed(category)
+    
+        entity_type_index = (
+            self.entity_type_combo.findText(
+                entity_type
+            )
+        )
+    
+        if entity_type_index >= 0:
+            self.entity_type_combo.setCurrentIndex(
+                entity_type_index
+            )
+    
+        self.entity_type_changed(entity_type)
+    
+        self.label_input.setText(
+            self.entity["label"]
+        )
+    
+        properties = self.entity["properties"]
+    
+        for property_name, value in properties.items():
+        
+            input_field = self.property_inputs.get(
+                property_name
+            )
+    
+            if input_field:
+                input_field.setText(
+                    str(value)
+                )

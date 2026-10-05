@@ -296,14 +296,37 @@ class Database:
             "date_created": row[6]
         }
 
-    def delete_entity(self, entity_id):
+    def update_entity(self, entity, category):
         connection = self.connect()
         cursor = connection.cursor()
     
         cursor.execute("""
+            UPDATE entities
+            SET
+                category = ?,
+                entity_type = ?,
+                label = ?,
+                properties = ?
+            WHERE entity_id = ?
+        """, (
+            category,
+            entity.type,
+            entity.label,
+            json.dumps(entity.properties),
+            entity.entity_id
+        ))
+    
+        connection.commit()
+        connection.close()
+
+    def delete_entity(self, entity_id):
+        connection = self.connect()
+        cursor = connection.cursor()
+
+        cursor.execute("""
             DELETE FROM entities
             WHERE entity_id = ?
         """, (entity_id,))
-    
+
         connection.commit()
         connection.close()
