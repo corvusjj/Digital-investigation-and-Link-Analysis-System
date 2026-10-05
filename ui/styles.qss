@@ -367,3 +367,32 @@ QListWidget#relationshipList::item:selected {
     background-color: #343a46;
     color: white;
 }
+
+QPushButton#zoomButton {
+    min-width: 36px;
+    max-width: 36px;
+
+    background-color: #2a2e36;
+    color: #ffffff;
+
+    border: 1px solid #3a3f4b;
+    border-radius: 6px;
+
+    font-size: 18px;
+    font-weight: bold;
+}
+
+QPushButton#zoomButton:hover {
+    background-color: #343a46;
+    color: #ffffff;
+}
+
+QPushButton#zoomButton:pressed {
+    background-color: #20232a;
+    color: #ffffff;
+}
+
+QPushButton#zoomButton:disabled {
+    background-color: #20232a;
+    color: #666666;
+}

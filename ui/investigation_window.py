@@ -427,16 +427,20 @@ class InvestigationWindow(QMainWindow):
         entities = self.database.get_entities(
             self.case.case_id
         )
-    
+
         relationships = self.database.get_relations(
             self.case.case_id
         )
-    
+
         self.investigation_graph.build(
             entities,
             relationships
         )
-    
+
+        self.graph_view.build_graph()
+
+    def reset_graph_layout(self):
+
         self.graph_view.build_graph()
 
     # =========================================
@@ -562,6 +566,7 @@ class InvestigationWindow(QMainWindow):
     # =========================================
 
     def create_graph_page(self):
+
         page = QWidget()
 
         layout = QVBoxLayout()
@@ -588,7 +593,60 @@ class InvestigationWindow(QMainWindow):
         title_layout.addWidget(description)
 
         header_layout.addLayout(title_layout)
+
         header_layout.addStretch()
+
+        # =========================================
+        # GRAPH CONTROLS
+        # =========================================
+
+        self.fit_graph_button = QPushButton(
+            "Fit Graph"
+        )
+
+        self.fit_graph_button.setObjectName(
+            "secondaryButton"
+        )
+
+        self.zoom_in_button = QPushButton(
+            "+"
+        )
+
+        self.zoom_in_button.setObjectName(
+            "zoomButton"
+        )
+
+        self.zoom_out_button = QPushButton(
+            "−"
+        )
+
+        self.zoom_out_button.setObjectName(
+            "zoomButton"
+        )
+
+        self.reset_layout_button = QPushButton(
+            "Reset Layout"
+        )
+
+        self.reset_layout_button.setObjectName(
+            "secondaryButton"
+        )
+
+        header_layout.addWidget(
+            self.fit_graph_button
+        )
+
+        header_layout.addWidget(
+            self.zoom_out_button
+        )
+
+        header_layout.addWidget(
+            self.zoom_in_button
+        )
+
+        header_layout.addWidget(
+            self.reset_layout_button
+        )
 
         layout.addLayout(header_layout)
 
@@ -603,6 +661,26 @@ class InvestigationWindow(QMainWindow):
         layout.addWidget(
             self.graph_view,
             1
+        )
+
+        # =========================================
+        # BUTTON CONNECTIONS
+        # =========================================
+
+        self.fit_graph_button.clicked.connect(
+            self.graph_view.fit_graph
+        )
+
+        self.zoom_in_button.clicked.connect(
+            self.graph_view.zoom_in
+        )
+
+        self.zoom_out_button.clicked.connect(
+            self.graph_view.zoom_out
+        )
+
+        self.reset_layout_button.clicked.connect(
+            self.reset_graph_layout
         )
 
         return page

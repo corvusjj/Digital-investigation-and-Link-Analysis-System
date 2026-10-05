@@ -269,3 +269,21 @@ class GraphView(QGraphicsView):
         super().mouseDoubleClickEvent(
             event
         )
+
+    # --------------------------------------------------
+    # Zoom
+    # --------------------------------------------------
+
+    def zoom_in(self):
+
+        self.scale(
+            1.2,
+            1.2
+        )
+
+    def zoom_out(self):
+
+        self.scale(
+            1 / 1.2,
+            1 / 1.2
+        )
