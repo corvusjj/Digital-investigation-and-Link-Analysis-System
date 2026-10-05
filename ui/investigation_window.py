@@ -8,7 +8,9 @@ from PyQt6.QtWidgets import (
     QStackedWidget,
     QListWidget,
     QListWidgetItem,
-    QMessageBox
+    QMessageBox,
+    QFrame,
+    QFormLayout
 )
 
 from ui.entity_form import EntityForm
@@ -658,8 +660,37 @@ class InvestigationWindow(QMainWindow):
             self.investigation_graph
         )
 
-        layout.addWidget(
+        self.graph_view.entity_selected_signal.connect(
+            self.show_entity_details
+        )
+
+        # =========================================
+        # GRAPH + DETAILS
+        # =========================================
+
+        graph_content_layout = QHBoxLayout()
+
+        # -----------------------------------------
+        # Graph
+        # -----------------------------------------
+
+        graph_content_layout.addWidget(
             self.graph_view,
+            1
+        )
+
+        # -----------------------------------------
+        # Entity Details
+        # -----------------------------------------
+
+        self.entity_details_panel = self.create_entity_details_panel()
+
+        graph_content_layout.addWidget(
+            self.entity_details_panel
+        )
+
+        layout.addLayout(
+            graph_content_layout,
             1
         )
 
@@ -684,6 +715,206 @@ class InvestigationWindow(QMainWindow):
         )
 
         return page
+
+    def create_entity_details_panel(self):
+
+        panel = QFrame()
+
+        panel.setObjectName(
+            "entityDetailsPanel"
+        )
+
+        panel.setMinimumWidth(280)
+        panel.setMaximumWidth(360)
+
+        layout = QVBoxLayout()
+
+        panel.setLayout(layout)
+
+        # =====================================
+        # TITLE
+        # =====================================
+
+        title = QLabel(
+            "Entity Details"
+        )
+
+        title.setObjectName(
+            "formTitle"
+        )
+
+        layout.addWidget(title)
+
+        description = QLabel(
+            "Select an entity in the graph "
+            "to inspect its details."
+        )
+
+        description.setObjectName(
+            "formDescription"
+        )
+
+        description.setWordWrap(True)
+
+        layout.addWidget(
+            description
+        )
+
+        # =====================================
+        # ENTITY TYPE
+        # =====================================
+
+        self.details_type = QLabel(
+            "—"
+        )
+
+        self.details_type.setObjectName(
+            "detailsType"
+        )
+
+        layout.addWidget(
+            self.details_type
+        )
+
+        # =====================================
+        # ENTITY LABEL
+        # =====================================
+
+        self.details_label = QLabel(
+            "No entity selected"
+        )
+
+        self.details_label.setObjectName(
+            "detailsLabel"
+        )
+
+        self.details_label.setWordWrap(True)
+
+        layout.addWidget(
+            self.details_label
+        )
+
+        # =====================================
+        # BASIC INFORMATION
+        # =====================================
+
+        basic_title = QLabel(
+            "Information"
+        )
+
+        basic_title.setObjectName(
+            "formSectionTitle"
+        )
+
+        layout.addWidget(
+            basic_title
+        )
+
+        form_layout = QFormLayout()
+
+        self.details_id = QLabel("—")
+        self.details_created = QLabel("—")
+
+        self.details_id.setWordWrap(True)
+
+        form_layout.addRow(
+            "Entity ID:",
+            self.details_id
+        )
+
+        form_layout.addRow(
+            "Created:",
+            self.details_created
+        )
+
+        layout.addLayout(
+            form_layout
+        )
+
+        # =====================================
+        # PROPERTIES
+        # =====================================
+
+        properties_title = QLabel(
+            "Properties"
+        )
+
+        properties_title.setObjectName(
+            "formSectionTitle"
+        )
+
+        layout.addWidget(
+            properties_title
+        )
+
+        self.details_properties = QLabel(
+            "—"
+        )
+
+        self.details_properties.setWordWrap(
+            True
+        )
+
+        layout.addWidget(
+            self.details_properties
+        )
+
+        layout.addStretch()
+
+        return panel
+
+    def show_entity_details(
+        self,
+        entity_id
+    ):
+
+        entity = self.database.get_entity(
+            entity_id
+        )
+    
+        if entity is None:
+            return
+    
+        self.details_type.setText(
+            entity["entity_type"]
+        )
+    
+        self.details_label.setText(
+            entity["label"]
+        )
+    
+        self.details_id.setText(
+            entity["entity_id"]
+        )
+    
+        self.details_created.setText(
+            entity["date_created"]
+        )
+    
+        properties = entity.get(
+            "properties",
+            {}
+        )
+    
+        if not properties:
+        
+            self.details_properties.setText(
+                "No properties."
+            )
+    
+            return
+    
+        property_lines = []
+    
+        for key, value in properties.items():
+        
+            property_lines.append(
+                f"<b>{key}</b>: {value}"
+            )
+    
+        self.details_properties.setText(
+            "<br>".join(property_lines)
+        )
 
     def back_to_cases(self):
         self.parent().show()

@@ -2,7 +2,10 @@ import math
 
 import networkx as nx
 
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import (
+    Qt,
+    pyqtSignal,
+)
 from PyQt6.QtGui import QBrush, QColor
 from PyQt6.QtWidgets import (
     QGraphicsScene,
@@ -14,6 +17,8 @@ from graph.graph_edge import GraphEdge
 
 
 class GraphView(QGraphicsView):
+
+    entity_selected_signal = pyqtSignal(str)
 
     def __init__(
         self,
@@ -117,6 +122,10 @@ class GraphView(QGraphicsView):
                 label=data["label"],
                 entity_type=data["entity_type"],
                 category=data["category"]
+            )
+
+            node.signals.clicked.connect(
+                self.entity_selected
             )
 
             self.scene.addItem(node)
@@ -286,4 +295,10 @@ class GraphView(QGraphicsView):
         self.scale(
             1 / 1.2,
             1 / 1.2
+        )
+
+    def entity_selected(self, entity_id):
+
+        self.entity_selected_signal.emit(
+            entity_id
         )

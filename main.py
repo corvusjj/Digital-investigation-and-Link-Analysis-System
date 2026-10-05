@@ -23,11 +23,10 @@ def main():
 
     window = MainWindow(database)
     window.show()
-
+    
     sys.exit(
         app.exec()
     )
 
 if __name__ == "__main__":
     main()
-    

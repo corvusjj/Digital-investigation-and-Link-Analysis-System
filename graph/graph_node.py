@@ -1,4 +1,8 @@
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import (
+    QObject,
+    Qt,
+    pyqtSignal,
+)
 from PyQt6.QtGui import (
     QBrush,
     QPen,
@@ -11,6 +15,9 @@ from PyQt6.QtWidgets import (
     QGraphicsTextItem,
 )
 
+class GraphNodeSignals(QObject):
+
+    clicked = pyqtSignal(str)
 
 class GraphNode(QGraphicsRectItem):
 
@@ -30,6 +37,8 @@ class GraphNode(QGraphicsRectItem):
             self.WIDTH,
             self.HEIGHT
         )
+
+        self.signals = GraphNodeSignals()
 
         self.entity_id = entity_id
         self.label = label
@@ -257,3 +266,16 @@ class GraphNode(QGraphicsRectItem):
                 edge.update_position()
 
         return result
+
+    def mousePressEvent(self, event):
+
+        if (
+            event.button()
+            == Qt.MouseButton.LeftButton
+        ):
+            self.signals.clicked.emit(
+                self.entity_id
+            )
+
+        super().mousePressEvent(event)
+    
