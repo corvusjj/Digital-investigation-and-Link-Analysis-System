@@ -181,6 +181,14 @@ class InvestigationWindow(QMainWindow):
             self.open_relation_form
         )
 
+        self.delete_relation_button.clicked.connect(
+            self.delete_relation
+        )
+
+        self.edit_relation_button.clicked.connect(
+            self.edit_relation
+        )
+
         self.back_button.clicked.connect(
             self.back_to_cases
         )
@@ -338,6 +346,66 @@ class InvestigationWindow(QMainWindow):
         dialog = RelationForm(
             database=self.database,
             case_id=self.case.case_id,
+            parent=self
+        )
+
+        if dialog.exec():
+            self.load_relationships()
+
+    def delete_relation(self):
+        current_item = self.relationship_list.currentItem()
+
+        if current_item is None:
+            return
+
+        relation_id = current_item.data(1)
+
+        relation = self.database.get_relation(
+            relation_id
+        )
+
+        if relation is None:
+            return
+
+        result = QMessageBox.question(
+            self,
+            "Delete Relationship",
+            "Are you sure you want to delete this relationship?",
+            QMessageBox.StandardButton.Yes
+            | QMessageBox.StandardButton.No
+        )
+
+        if result != QMessageBox.StandardButton.Yes:
+            return
+
+        self.database.delete_relation(
+            relation_id
+        )
+
+        self.load_relationships()
+
+        self.edit_relation_button.setEnabled(False)
+        self.delete_relation_button.setEnabled(False)
+
+    def edit_relation(self):
+        current_item = self.relationship_list.currentItem()
+
+        if current_item is None:
+            return
+
+        relation_id = current_item.data(1)
+
+        relation = self.database.get_relation(
+            relation_id
+        )
+
+        if relation is None:
+            return
+
+        dialog = RelationForm(
+            database=self.database,
+            case_id=self.case.case_id,
+            relation=relation,
             parent=self
         )
 

@@ -442,11 +442,39 @@ class Database:
     def delete_relation(self, relation_id):
         connection = self.connect()
         cursor = connection.cursor()
-    
+
         cursor.execute("""
             DELETE FROM relationships
             WHERE relation_id = ?
         """, (relation_id,))
+
+        connection.commit()
+        connection.close()
+
+    def update_relation(
+        self,
+        relation_id,
+        relation_type,
+        source_id,
+        target_id
+    ):
+        connection = self.connect()
+        cursor = connection.cursor()
+    
+        cursor.execute("""
+            UPDATE relationships
+            SET
+                relation_type = ?,
+                source_id = ?,
+                target_id = ?
+            WHERE relation_id = ?
+        """, (
+            relation_type,
+            source_id,
+            target_id,
+            relation_id
+        ))
     
         connection.commit()
         connection.close()
+    
