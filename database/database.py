@@ -7,7 +7,9 @@ class Database:
         self.database_path = database_path
 
     def connect(self):
-        return sqlite3.connect(self.database_path)
+        connection = sqlite3.connect(self.database_path)
+        connection.execute("PRAGMA foreign_keys = ON")
+        return connection
 
     def initialize(self):
         connection = self.connect()
@@ -40,6 +42,28 @@ class Database:
                 FOREIGN KEY (case_id)
                 REFERENCES cases(case_id)
                 ON DELETE CASCADE
+            )
+        """)
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS relationships (
+                relation_id TEXT PRIMARY KEY,
+                case_id TEXT NOT NULL,
+                relation_type TEXT NOT NULL,
+                source_id TEXT NOT NULL,
+                target_id TEXT NOT NULL,
+
+                FOREIGN KEY (case_id)
+                    REFERENCES cases(case_id)
+                    ON DELETE CASCADE,
+
+                FOREIGN KEY (source_id)
+                    REFERENCES entities(entity_id)
+                    ON DELETE CASCADE,
+
+                FOREIGN KEY (target_id)
+                    REFERENCES entities(entity_id)
+                    ON DELETE CASCADE
             )
         """)
 
@@ -299,7 +323,7 @@ class Database:
     def update_entity(self, entity, category):
         connection = self.connect()
         cursor = connection.cursor()
-    
+
         cursor.execute("""
             UPDATE entities
             SET
@@ -315,7 +339,7 @@ class Database:
             json.dumps(entity.properties),
             entity.entity_id
         ))
-    
+
         connection.commit()
         connection.close()
 
@@ -328,5 +352,101 @@ class Database:
             WHERE entity_id = ?
         """, (entity_id,))
 
+        connection.commit()
+        connection.close()
+
+    def create_relation(self, relation, case_id):
+        connection = self.connect()
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            INSERT INTO relationships (
+                relation_id,
+                case_id,
+                relation_type,
+                source_id,
+                target_id
+            )
+            VALUES (?, ?, ?, ?, ?)
+        """, (
+            relation.relation_id,
+            case_id,
+            relation.relation_type,
+            relation.source_id,
+            relation.target_id
+        ))
+
+        connection.commit()
+        connection.close()
+
+    def get_relations(self, case_id):
+        connection = self.connect()
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            SELECT
+                relation_id,
+                case_id,
+                relation_type,
+                source_id,
+                target_id
+            FROM relationships
+            WHERE case_id = ?
+        """, (case_id,))
+
+        rows = cursor.fetchall()
+        connection.close()
+
+        relations = []
+
+        for row in rows:
+            relations.append({
+                "relation_id": row[0],
+                "case_id": row[1],
+                "relation_type": row[2],
+                "source_id": row[3],
+                "target_id": row[4]
+            })
+
+        return relations
+
+    def get_relation(self, relation_id):
+        connection = self.connect()
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            SELECT
+                relation_id,
+                case_id,
+                relation_type,
+                source_id,
+                target_id
+            FROM relationships
+            WHERE relation_id = ?
+        """, (relation_id,))
+
+        row = cursor.fetchone()
+        connection.close()
+
+        if row is None:
+            return None
+
+        return {
+            "relation_id": row[0],
+            "case_id": row[1],
+            "relation_type": row[2],
+            "source_id": row[3],
+            "target_id": row[4]
+        }
+
+    def delete_relation(self, relation_id):
+        connection = self.connect()
+        cursor = connection.cursor()
+    
+        cursor.execute("""
+            DELETE FROM relationships
+            WHERE relation_id = ?
+        """, (relation_id,))
+    
         connection.commit()
         connection.close()
