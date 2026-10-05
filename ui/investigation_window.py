@@ -861,6 +861,32 @@ class InvestigationWindow(QMainWindow):
 
         layout.addStretch()
 
+        # =====================================
+        # CONNECTIONS SECTION
+        # =====================================
+
+        connections_title = QLabel(
+            "Connections"
+        )
+
+        connections_title.setObjectName(
+            "formSectionTitle"
+        )
+
+        layout.addWidget(
+            connections_title
+        )
+
+        self.details_connections = QListWidget()
+
+        self.details_connections.setObjectName(
+            "detailsConnections"
+        )
+
+        layout.addWidget(
+            self.details_connections
+        )
+
         return panel
 
     def show_entity_details(
@@ -871,51 +897,139 @@ class InvestigationWindow(QMainWindow):
         entity = self.database.get_entity(
             entity_id
         )
-    
+
         if entity is None:
             return
-    
+
         self.details_type.setText(
             entity["entity_type"]
         )
-    
+
         self.details_label.setText(
             entity["label"]
         )
-    
+
         self.details_id.setText(
             entity["entity_id"]
         )
-    
+
         self.details_created.setText(
             entity["date_created"]
         )
-    
+
         properties = entity.get(
             "properties",
             {}
         )
-    
+
         if not properties:
-        
+
             self.details_properties.setText(
                 "No properties."
             )
-    
+
             return
-    
+
         property_lines = []
-    
+
         for key, value in properties.items():
-        
+
             property_lines.append(
                 f"<b>{key}</b>: {value}"
             )
-    
+
         self.details_properties.setText(
             "<br>".join(property_lines)
         )
 
+        self.load_entity_connections(
+            entity["entity_id"]
+        )
+
+    def load_entity_connections(
+        self,
+        entity_id
+    ):
+
+        self.details_connections.clear()
+    
+        relationships = self.database.get_relations(
+            self.case.case_id
+        )
+    
+        connection_count = 0
+    
+        for relation in relationships:
+        
+            source_id = relation["source_id"]
+            target_id = relation["target_id"]
+    
+            # Entity is the source
+            if source_id == entity_id:
+            
+                connected_entity = (
+                    self.database.get_entity(
+                        target_id
+                    )
+                )
+    
+                if connected_entity is None:
+                    continue
+                
+                item = QListWidgetItem(
+                    f"→  "
+                    f"{relation['relation_type']}  "
+                    f"→  "
+                    f"{connected_entity['label']}"
+                )
+    
+                item.setData(
+                    1,
+                    connected_entity["entity_id"]
+                )
+    
+                self.details_connections.addItem(
+                    item
+                )
+    
+                connection_count += 1
+    
+            # Entity is the target
+            elif target_id == entity_id:
+            
+                connected_entity = (
+                    self.database.get_entity(
+                        source_id
+                    )
+                )
+    
+                if connected_entity is None:
+                    continue
+                
+                item = QListWidgetItem(
+                    f"←  "
+                    f"{relation['relation_type']}  "
+                    f"←  "
+                    f"{connected_entity['label']}"
+                )
+    
+                item.setData(
+                    1,
+                    connected_entity["entity_id"]
+                )
+    
+                self.details_connections.addItem(
+                    item
+                )
+    
+                connection_count += 1
+    
+        if connection_count == 0:
+        
+            self.details_connections.addItem(
+                "No connections."
+            )
+    
     def back_to_cases(self):
         self.parent().show()
         self.close()

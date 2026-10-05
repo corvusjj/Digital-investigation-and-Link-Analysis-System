@@ -416,3 +416,25 @@ QLabel#detailsLabel {
     font-weight: bold;
     padding-bottom: 12px;
 }
+
+QListWidget#detailsConnections {
+    background-color: #181a1f;
+    border: 1px solid #30343b;
+    border-radius: 6px;
+    padding: 4px;
+    outline: none;
+}
+
+QListWidget#detailsConnections::item {
+    padding: 10px;
+    border-radius: 5px;
+}
+
+QListWidget#detailsConnections::item:hover {
+    background-color: #2a2e36;
+}
+
+QListWidget#detailsConnections::item:selected {
+    background-color: #343a46;
+    color: white;
+}
