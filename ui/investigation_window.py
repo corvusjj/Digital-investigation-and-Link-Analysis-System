@@ -14,6 +14,7 @@ from PyQt6.QtWidgets import (
 from ui.entity_form import EntityForm
 from ui.relation_form import RelationForm
 from graph.investigation_graph import InvestigationGraph
+from graph.graph_view import GraphView
 
 class InvestigationWindow(QMainWindow):
     def __init__(self, database, case, parent=None):
@@ -235,6 +236,7 @@ class InvestigationWindow(QMainWindow):
 
         if dialog.exec():
             self.load_entities()
+            self.build_graph()
 
     def edit_entity(self):
 
@@ -261,6 +263,7 @@ class InvestigationWindow(QMainWindow):
 
         if dialog.exec():
             self.load_entities()
+            self.build_graph()
 
     def delete_entity(self):
 
@@ -297,6 +300,7 @@ class InvestigationWindow(QMainWindow):
         )
     
         self.load_entities()
+        self.build_graph()
     
         self.edit_entity_button.setEnabled(False)
         self.delete_entity_button.setEnabled(False)
@@ -355,6 +359,7 @@ class InvestigationWindow(QMainWindow):
 
         if dialog.exec():
             self.load_relationships()
+            self.build_graph()
 
     def delete_relation(self):
         current_item = self.relationship_list.currentItem()
@@ -387,6 +392,7 @@ class InvestigationWindow(QMainWindow):
         )
 
         self.load_relationships()
+        self.build_graph()
 
         self.edit_relation_button.setEnabled(False)
         self.delete_relation_button.setEnabled(False)
@@ -415,20 +421,23 @@ class InvestigationWindow(QMainWindow):
 
         if dialog.exec():
             self.load_relationships()
+            self.build_graph()
 
     def build_graph(self):
         entities = self.database.get_entities(
             self.case.case_id
         )
-
+    
         relationships = self.database.get_relations(
             self.case.case_id
         )
-
+    
         self.investigation_graph.build(
             entities,
             relationships
         )
+    
+        self.graph_view.build_graph()
 
     # =========================================
     # ENTITIES PAGE
@@ -558,6 +567,14 @@ class InvestigationWindow(QMainWindow):
         layout = QVBoxLayout()
         page.setLayout(layout)
 
+        # =========================================
+        # HEADER
+        # =========================================
+
+        header_layout = QHBoxLayout()
+
+        title_layout = QVBoxLayout()
+
         title = QLabel("Graph")
         title.setObjectName("pageTitle")
 
@@ -567,8 +584,26 @@ class InvestigationWindow(QMainWindow):
         )
         description.setObjectName("pageDescription")
 
-        layout.addWidget(title)
-        layout.addWidget(description)
+        title_layout.addWidget(title)
+        title_layout.addWidget(description)
+
+        header_layout.addLayout(title_layout)
+        header_layout.addStretch()
+
+        layout.addLayout(header_layout)
+
+        # =========================================
+        # GRAPH VIEW
+        # =========================================
+
+        self.graph_view = GraphView(
+            self.investigation_graph
+        )
+
+        layout.addWidget(
+            self.graph_view,
+            1
+        )
 
         return page
 
