@@ -13,6 +13,7 @@ from PyQt6.QtWidgets import (
 
 from ui.entity_form import EntityForm
 from ui.relation_form import RelationForm
+from graph.investigation_graph import InvestigationGraph
 
 class InvestigationWindow(QMainWindow):
     def __init__(self, database, case, parent=None):
@@ -20,6 +21,8 @@ class InvestigationWindow(QMainWindow):
 
         self.database = database
         self.case = case
+
+        self.investigation_graph = InvestigationGraph()
 
         self.setWindowTitle(
             f"{case.case_name} - Investigation"
@@ -29,6 +32,7 @@ class InvestigationWindow(QMainWindow):
         self.setup_ui()
         self.load_entities()
         self.load_relationships()
+        self.build_graph()
 
     def setup_ui(self):
         central_widget = QWidget()
@@ -411,6 +415,20 @@ class InvestigationWindow(QMainWindow):
 
         if dialog.exec():
             self.load_relationships()
+
+    def build_graph(self):
+        entities = self.database.get_entities(
+            self.case.case_id
+        )
+
+        relationships = self.database.get_relations(
+            self.case.case_id
+        )
+
+        self.investigation_graph.build(
+            entities,
+            relationships
+        )
 
     # =========================================
     # ENTITIES PAGE
