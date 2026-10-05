@@ -1,5 +1,6 @@
 import math
 
+from PyQt6.QtWidgets import QGraphicsRectItem
 from PyQt6.QtCore import QPointF, Qt
 from PyQt6.QtGui import (
     QBrush,
@@ -43,8 +44,25 @@ class GraphEdge(QGraphicsLineItem):
 
     def setup_label(self):
 
+        self.label_background = QGraphicsRectItem(
+            self
+        )
+
+        self.label_background.setBrush(
+            QBrush(
+                Qt.GlobalColor.darkGray
+            )
+        )
+
+        self.label_background.setPen(
+            QPen(Qt.PenStyle.NoPen)
+        )
+
+        self.label_background.setZValue(1)
+
         self.label = QGraphicsTextItem(
-            self.relation_type
+            self.relation_type,
+            self
         )
 
         self.label.setFont(
@@ -59,23 +77,79 @@ class GraphEdge(QGraphicsLineItem):
             Qt.GlobalColor.lightGray
         )
 
-        self.label.setParentItem(self)
+        self.label.setZValue(2)
 
     def update_position(self):
 
-        source_center = self.source_node.sceneBoundingRect().center()
-        target_center = self.target_node.sceneBoundingRect().center()
+        source_rect = self.source_node.sceneBoundingRect()
+        target_rect = self.target_node.sceneBoundingRect()
+
+        source_center = source_rect.center()
+        target_center = target_rect.center()
+
+        dx = target_center.x() - source_center.x()
+        dy = target_center.y() - source_center.y()
+
+        if dx == 0 and dy == 0:
+            return
+
+        # Find where the line intersects the source node
+        source_scale = self.get_rect_intersection(
+            source_rect,
+            dx,
+            dy
+        )
+
+        # Find where the line intersects the target node
+        target_scale = self.get_rect_intersection(
+            target_rect,
+            -dx,
+            -dy
+        )
+
+        source_point = QPointF(
+            source_center.x() + dx * source_scale,
+            source_center.y() + dy * source_scale
+        )
+
+        target_point = QPointF(
+            target_center.x() - dx * target_scale,
+            target_center.y() - dy * target_scale
+        )
 
         self.setLine(
-            source_center.x(),
-            source_center.y(),
-            target_center.x(),
-            target_center.y()
+            source_point.x(),
+            source_point.y(),
+            target_point.x(),
+            target_point.y()
         )
 
         self.update_label_position()
 
         self.update()
+
+    def get_rect_intersection(
+        self,
+        rect,
+        dx,
+        dy
+    ):
+        half_width = rect.width() / 2
+        half_height = rect.height() / 2
+
+        if dx == 0:
+            return half_height / abs(dy)
+
+        if dy == 0:
+            return half_width / abs(dx)
+
+        scale_x = half_width / abs(dx)
+        scale_y = half_height / abs(dy)
+
+        return min(
+            scale_x,
+            scale_y
+        )
 
     def update_label_position(self):
 
@@ -88,9 +162,30 @@ class GraphEdge(QGraphicsLineItem):
 
         label_rect = self.label.boundingRect()
 
+        padding = 4
+
+        self.label_background.setRect(
+            midpoint.x()
+            - label_rect.width() / 2
+            - padding,
+
+            midpoint.y()
+            - label_rect.height() / 2
+            - padding / 2,
+
+            label_rect.width()
+            + padding * 2,
+
+            label_rect.height()
+            + padding
+        )
+
         self.label.setPos(
-            midpoint.x() - label_rect.width() / 2,
-            midpoint.y() - label_rect.height() / 2
+            midpoint.x()
+            - label_rect.width() / 2,
+
+            midpoint.y()
+            - label_rect.height() / 2
         )
 
     def paint(
@@ -179,19 +274,17 @@ class GraphEdge(QGraphicsLineItem):
 
         if self.isSelected():
 
-            painter.setBrush(
-                QBrush(
-                    Qt.GlobalColor.white
-                )
+            brush = QBrush(
+                Qt.GlobalColor.white
             )
 
         else:
 
-            painter.setBrush(
-                QBrush(
-                    Qt.GlobalColor.gray
-                )
+            brush = QBrush(
+                Qt.GlobalColor.gray
             )
+
+        painter.setBrush(brush)
 
         painter.setPen(
             Qt.PenStyle.NoPen
@@ -207,14 +300,14 @@ class GraphEdge(QGraphicsLineItem):
             change
             == QGraphicsItem.GraphicsItemChange.ItemPositionChange
         ):
-    
+
             for edge in getattr(
                 self,
                 "edges",
                 []
             ):
                 edge.update_position()
-    
+
         return super().itemChange(
             change,
             value
