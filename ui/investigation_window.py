@@ -12,6 +12,7 @@ from PyQt6.QtWidgets import (
 )
 
 from ui.entity_form import EntityForm
+from ui.relation_form import RelationForm
 
 class InvestigationWindow(QMainWindow):
     def __init__(self, database, case, parent=None):
@@ -176,6 +177,10 @@ class InvestigationWindow(QMainWindow):
             self.select_relationship
         )
 
+        self.add_relation_button.clicked.connect(
+            self.open_relation_form
+        )
+
         self.back_button.clicked.connect(
             self.back_to_cases
         )
@@ -318,16 +323,26 @@ class InvestigationWindow(QMainWindow):
 
     def select_relationship(self, item):
         relation_id = item.data(1)
-    
+
         relation = self.database.get_relation(
             relation_id
         )
-    
+
         if relation is None:
             return
-    
+
         self.edit_relation_button.setEnabled(True)
         self.delete_relation_button.setEnabled(True)
+
+    def open_relation_form(self):
+        dialog = RelationForm(
+            database=self.database,
+            case_id=self.case.case_id,
+            parent=self
+        )
+
+        if dialog.exec():
+            self.load_relationships()
 
     # =========================================
     # ENTITIES PAGE
