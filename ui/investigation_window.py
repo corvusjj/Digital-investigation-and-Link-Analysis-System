@@ -729,6 +729,20 @@ class InvestigationWindow(QMainWindow):
             path_layout
         )
 
+        self.path_result_label = QLabel(
+            "No path analysis performed."
+        )
+
+        self.path_result_label.setObjectName(
+            "pathResult"
+        )
+
+        self.path_result_label.setWordWrap(True)
+
+        layout.addWidget(
+            self.path_result_label
+        )
+
         # =========================================
         # GRAPH VIEW
         # =========================================
@@ -1224,6 +1238,69 @@ class InvestigationWindow(QMainWindow):
 
         self.graph_view.center_path(
             path
+        )
+
+        self.display_path_result(
+            path
+        )
+
+    def get_entity_label(self, entity_id):
+        entity = self.database.get_entity(
+            entity_id
+        )
+
+        if entity is None:
+            return "Unknown Entity"
+
+        return (
+            f"{entity['entity_type']} • "
+            f"{entity['label']}"
+        )
+
+    def display_path_result(self, path):
+        if not path:
+            return
+
+        lines = []
+
+        for index, entity_id in enumerate(path):
+
+            entity = self.database.get_entity(
+                entity_id
+            )
+
+            if entity is None:
+                continue
+
+            label = (
+                f"{entity['entity_type']} • "
+                f"{entity['label']}"
+            )
+
+            lines.append(label)
+
+            if index < len(path) - 1:
+
+                next_id = path[index + 1]
+
+                relation = (
+                    self.database.get_relation_between(
+                        entity_id,
+                        next_id,
+                        self.case.case_id
+                    )
+                )
+
+                if relation:
+
+                    lines.append(
+                        f"    ↓ {relation['relation_type']}"
+                    )
+
+        result = "\n".join(lines)
+
+        self.path_result_label.setText(
+            result
         )
 
     def back_to_cases(self):

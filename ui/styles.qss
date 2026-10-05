@@ -438,3 +438,17 @@ QListWidget#detailsConnections::item:selected {
     background-color: #343a46;
     color: white;
 }
+
+#pathResult {
+    background-color: #1b1e24;
+    border: 1px solid #343943;
+    border-radius: 8px;
+    padding: 12px;
+    color: #d9dde5;
+    font-size: 13px;
+}
+
+#pathCombo {
+    min-width: 180px;
+    padding: 6px;
+}

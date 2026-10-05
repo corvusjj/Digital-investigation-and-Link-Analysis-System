@@ -460,7 +460,7 @@ class Database:
     ):
         connection = self.connect()
         cursor = connection.cursor()
-    
+
         cursor.execute("""
             UPDATE relationships
             SET
@@ -474,7 +474,49 @@ class Database:
             target_id,
             relation_id
         ))
-    
+
         connection.commit()
         connection.close()
+
+    def get_relation_between(
+        self,
+        source_id,
+        target_id,
+        case_id
+    ):
     
+        connection = self.connect()
+        cursor = connection.cursor()
+    
+        cursor.execute("""
+            SELECT
+                relation_id,
+                case_id,
+                relation_type,
+                source_id,
+                target_id
+            FROM relationships
+            WHERE case_id = ?
+            AND source_id = ?
+            AND target_id = ?
+            LIMIT 1
+        """, (
+            case_id,
+            source_id,
+            target_id
+        ))
+    
+        row = cursor.fetchone()
+    
+        connection.close()
+    
+        if row is None:
+            return None
+    
+        return {
+            "relation_id": row[0],
+            "case_id": row[1],
+            "relation_type": row[2],
+            "source_id": row[3],
+            "target_id": row[4]
+        }
