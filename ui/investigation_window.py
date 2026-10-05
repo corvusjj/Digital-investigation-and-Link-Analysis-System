@@ -883,11 +883,42 @@ class InvestigationWindow(QMainWindow):
             "detailsConnections"
         )
 
+        self.details_connections.itemClicked.connect(
+            self.select_connected_entity
+        )
+
         layout.addWidget(
             self.details_connections
         )
 
         return panel
+
+    def select_connected_entity(self, item):
+
+        entity_id = item.data(1)
+
+        if entity_id is None:
+            return
+
+        node = self.graph_view.nodes.get(
+            entity_id
+        )
+
+        if node is None:
+            return
+
+        # Select the node
+        self.graph_view.scene.clearSelection()
+
+        node.setSelected(True)
+
+        # Center the graph on the node
+        self.graph_view.centerOn(node)
+
+        # Show its details
+        self.show_entity_details(
+            entity_id
+        )
 
     def show_entity_details(
         self,
@@ -952,84 +983,84 @@ class InvestigationWindow(QMainWindow):
     ):
 
         self.details_connections.clear()
-    
+
         relationships = self.database.get_relations(
             self.case.case_id
         )
-    
+
         connection_count = 0
-    
+
         for relation in relationships:
-        
+
             source_id = relation["source_id"]
             target_id = relation["target_id"]
-    
+
             # Entity is the source
             if source_id == entity_id:
-            
+
                 connected_entity = (
                     self.database.get_entity(
                         target_id
                     )
                 )
-    
+
                 if connected_entity is None:
                     continue
-                
+
                 item = QListWidgetItem(
                     f"→  "
                     f"{relation['relation_type']}  "
                     f"→  "
                     f"{connected_entity['label']}"
                 )
-    
+
                 item.setData(
                     1,
                     connected_entity["entity_id"]
                 )
-    
+
                 self.details_connections.addItem(
                     item
                 )
-    
+
                 connection_count += 1
-    
+
             # Entity is the target
             elif target_id == entity_id:
-            
+
                 connected_entity = (
                     self.database.get_entity(
                         source_id
                     )
                 )
-    
+
                 if connected_entity is None:
                     continue
-                
+
                 item = QListWidgetItem(
                     f"←  "
                     f"{relation['relation_type']}  "
                     f"←  "
                     f"{connected_entity['label']}"
                 )
-    
+
                 item.setData(
                     1,
                     connected_entity["entity_id"]
                 )
-    
+
                 self.details_connections.addItem(
                     item
                 )
-    
+
                 connection_count += 1
-    
+
         if connection_count == 0:
-        
+
             self.details_connections.addItem(
                 "No connections."
             )
-    
+
     def back_to_cases(self):
         self.parent().show()
         self.close()
