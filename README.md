@@ -715,8 +715,6 @@ Path analysis also retrieves relationships between entities when displaying the 
 
 ## 11. Screenshots
 
-The following screenshots should be added to document the major parts of the working application.
-
 ### Main Window
 
 ![Main Window](screenshots/main_window.png)
