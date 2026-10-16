@@ -11,13 +11,17 @@ from PyQt6.QtWidgets import (
     QMessageBox,
     QFrame,
     QFormLayout,
-    QComboBox
+    QComboBox,
+    QFileDialog
 )
+from PyQt6.QtGui import QPixmap
+from PyQt6.QtCore import Qt
 
 from ui.entity_form import EntityForm
 from ui.relation_form import RelationForm
 from graph.investigation_graph import InvestigationGraph
 from graph.graph_view import GraphView
+from utils.image_processor import ImageProcessor
 
 class InvestigationWindow(QMainWindow):
     def __init__(self, database, case, parent=None):
@@ -892,7 +896,31 @@ class InvestigationWindow(QMainWindow):
         layout.addWidget(
             self.details_label
         )
+    
+        # =====================================
+        # ENTITY IMAGE
+        # =====================================
 
+        self.details_image = QLabel("No image uploaded")
+        self.details_image.setObjectName("detailsImage")
+        self.details_image.setAlignment(
+            Qt.AlignmentFlag.AlignCenter
+        )
+        self.details_image.setFixedHeight(190)
+        self.details_image.setWordWrap(True)
+
+        layout.addWidget(self.details_image)
+
+        self.upload_image_button = QPushButton("Upload Image")
+        self.upload_image_button.setObjectName("secondaryButton")
+        self.upload_image_button.setEnabled(False)
+
+        self.upload_image_button.clicked.connect(
+            self.upload_entity_image
+        )
+
+        layout.addWidget(self.upload_image_button)
+        
         # =====================================
         # BASIC INFORMATION
         # =====================================
@@ -1034,6 +1062,12 @@ class InvestigationWindow(QMainWindow):
 
         if entity is None:
             return
+        
+        self.selected_graph_entity_id = entity_id
+
+        self.upload_image_button.setEnabled(True)
+
+        self.display_entity_image(entity_id)
 
         self.details_type.setText(
             entity["entity_type"]
@@ -1057,28 +1091,24 @@ class InvestigationWindow(QMainWindow):
         )
 
         if not properties:
-
             self.details_properties.setText(
                 "No properties."
             )
+        else:
+            property_lines = []
 
-            return
+            for key, value in properties.items():
+                property_lines.append(
+                    f"<b>{key}</b>: {value}"
+                )
 
-        property_lines = []
-
-        for key, value in properties.items():
-
-            property_lines.append(
-                f"<b>{key}</b>: {value}"
+            self.details_properties.setText(
+                "<br>".join(property_lines)
             )
 
-        self.details_properties.setText(
-            "<br>".join(property_lines)
-        )
-
-        self.load_entity_connections(
-            entity["entity_id"]
-        )
+            self.load_entity_connections(
+                entity["entity_id"]
+            )
 
     def load_entity_connections(
         self,
@@ -1302,6 +1332,92 @@ class InvestigationWindow(QMainWindow):
         self.path_result_label.setText(
             result
         )
+ 
+    def upload_entity_image(self):
+        entity_id = getattr(
+            self, "selected_graph_entity_id", None
+        )
+
+        if entity_id is None:
+            return
+
+        image_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select Entity Image",
+            "",
+            "Images (*.png *.jpg *.jpeg *.webp *.bmp)"
+        )
+
+        if not image_path:
+            return
+
+        try:
+            compressed_image = ImageProcessor.compress(
+                image_path
+            )
+
+            import os
+
+            original_size = os.path.getsize(image_path)
+            compressed_size = len(compressed_image)
+            
+            print(f"Original: {original_size / 1024:.2f} KB")
+            print(f"Compressed: {compressed_size / 1024:.2f} KB")
+
+            self.database.save_entity_image(
+                entity_id,
+                compressed_image
+            )
+
+            self.display_entity_image(entity_id)
+
+            self.upload_image_button.setText(
+                "Replace Image"
+            )
+
+        except (ValueError, OSError, Exception) as error:
+            QMessageBox.warning(
+                self,
+                "Image Upload Failed",
+                str(error)
+            )
+
+
+    def display_entity_image(self, entity_id):
+        image_data = self.database.get_entity_image(
+            entity_id
+        )
+
+        if not image_data:
+            self.details_image.clear()
+            self.details_image.setText(
+                "No image uploaded"
+            )
+            self.upload_image_button.setText(
+                "Upload Image"
+            )
+            return
+
+        pixmap = QPixmap()
+
+        if not pixmap.loadFromData(image_data):
+            self.details_image.setText(
+                "Unable to display image"
+            )
+            return
+
+        scaled_pixmap = pixmap.scaled(
+            300,
+            180,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation
+        )
+
+        self.details_image.setPixmap(scaled_pixmap)
+        self.upload_image_button.setText(
+            "Replace Image"
+        )
+
 
     def back_to_cases(self):
         self.parent().show()

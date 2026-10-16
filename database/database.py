@@ -67,6 +67,16 @@ class Database:
             )
         """)
 
+        
+        # Add image storage to existing databases.
+        cursor.execute("PRAGMA table_info(entities)")
+        columns = {row[1] for row in cursor.fetchall()}
+
+        if "image_data" not in columns:
+            cursor.execute(
+                "ALTER TABLE entities ADD COLUMN image_data BLOB"
+            )
+
         connection.commit()
         connection.close()
 
@@ -520,3 +530,40 @@ class Database:
             "source_id": row[3],
             "target_id": row[4]
         }
+
+    def save_entity_image(self, entity_id, image_data):
+        connection = self.connect()
+        try:
+            cursor = connection.execute(
+                """
+                UPDATE entities
+                SET image_data = ?
+                WHERE entity_id = ?
+                """,
+                (image_data, entity_id)
+            )
+
+            if cursor.rowcount == 0:
+                raise ValueError("Entity not found.")
+
+            connection.commit()
+        finally:
+            connection.close()
+
+    def get_entity_image(self, entity_id):
+        connection = self.connect()
+        try:
+            cursor = connection.execute(
+                """
+                SELECT image_data
+                FROM entities
+                WHERE entity_id = ?
+                """,
+                (entity_id,)
+            )
+
+            row = cursor.fetchone()
+            return row[0] if row else None
+        finally:
+            connection.close()
+
