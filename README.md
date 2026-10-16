@@ -856,6 +856,14 @@ The path analysis feature allows users to select a source and target entity and 
 
 The resulting path is highlighted in the graph and displayed in the path analysis panel.
 
+### Entity Image Management
+
+![Entity Image Management](screenshots/image_upload.png)
+
+The entity image management feature allows users to upload, replace, and remove images associated with investigation entities.
+
+Uploaded images are automatically resized and compressed using Pillow to optimize storage in the SQLite database.
+
 ---
 
 ## 12. Testing
