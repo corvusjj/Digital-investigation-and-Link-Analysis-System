@@ -566,4 +566,24 @@ class Database:
             return row[0] if row else None
         finally:
             connection.close()
+  
+    def remove_entity_image(self, entity_id):
+        connection = self.connect()
 
+        try:
+            cursor = connection.execute(
+                """
+                UPDATE entities
+                SET image_data = NULL
+                WHERE entity_id = ?
+                """,
+                (entity_id,)
+            )
+
+            if cursor.rowcount == 0:
+                raise ValueError("Entity not found.")
+
+            connection.commit()
+
+        finally:
+            connection.close()

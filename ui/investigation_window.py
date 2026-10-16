@@ -922,6 +922,20 @@ class InvestigationWindow(QMainWindow):
         layout.addWidget(self.upload_image_button)
         
         # =====================================
+        # REMOVE ENTITY IMAGE
+        # =====================================
+
+        self.remove_image_button = QPushButton("Remove Image")
+        self.remove_image_button.setObjectName("dangerButton")
+        self.remove_image_button.setEnabled(False)
+
+        self.remove_image_button.clicked.connect(
+            self.remove_entity_image
+        )
+
+        layout.addWidget(self.remove_image_button)
+ 
+        # =====================================
         # BASIC INFORMATION
         # =====================================
 
@@ -1360,7 +1374,7 @@ class InvestigationWindow(QMainWindow):
 
             original_size = os.path.getsize(image_path)
             compressed_size = len(compressed_image)
-            
+
             print(f"Original: {original_size / 1024:.2f} KB")
             print(f"Compressed: {compressed_size / 1024:.2f} KB")
 
@@ -1382,6 +1396,38 @@ class InvestigationWindow(QMainWindow):
                 str(error)
             )
 
+    def remove_entity_image(self):
+        entity_id = getattr(
+            self, "selected_graph_entity_id", None
+        )
+
+        if entity_id is None:
+            return
+
+        confirmation = QMessageBox.question(
+            self,
+            "Remove Image",
+            "Are you sure you want to remove this entity's image?",
+            QMessageBox.StandardButton.Yes
+            | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No
+        )
+
+        if confirmation != QMessageBox.StandardButton.Yes:
+            return
+
+        try:
+            self.database.remove_entity_image(entity_id)
+
+            # Refresh the image preview and button states
+            self.display_entity_image(entity_id)
+
+        except Exception as error:
+            QMessageBox.warning(
+                self,
+                "Remove Image Failed",
+                str(error)
+            )
 
     def display_entity_image(self, entity_id):
         image_data = self.database.get_entity_image(
@@ -1390,20 +1436,20 @@ class InvestigationWindow(QMainWindow):
 
         if not image_data:
             self.details_image.clear()
-            self.details_image.setText(
-                "No image uploaded"
-            )
-            self.upload_image_button.setText(
-                "Upload Image"
-            )
+            self.details_image.setText("No image uploaded")
+
+            self.upload_image_button.setText("Upload Image")
+            self.remove_image_button.setEnabled(False)
             return
 
         pixmap = QPixmap()
 
         if not pixmap.loadFromData(image_data):
+            self.details_image.clear()
             self.details_image.setText(
                 "Unable to display image"
             )
+            self.remove_image_button.setEnabled(False)
             return
 
         scaled_pixmap = pixmap.scaled(
@@ -1414,10 +1460,9 @@ class InvestigationWindow(QMainWindow):
         )
 
         self.details_image.setPixmap(scaled_pixmap)
-        self.upload_image_button.setText(
-            "Replace Image"
-        )
 
+        self.upload_image_button.setText("Replace Image")
+        self.remove_image_button.setEnabled(True)
 
     def back_to_cases(self):
         self.parent().show()
