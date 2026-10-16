@@ -10,3 +10,4 @@ ui/__pycache__
 models/__pycache__
 .venv
 graph/__pycache__
+utils/__pycache__
