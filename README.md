@@ -51,6 +51,7 @@ The main objective of the Digital Investigation and Link Analysis System is to p
 8. To allow users to highlight entities and their direct connections.
 9. To provide path analysis between selected source and target entities.
 10. To make investigation data easier to understand and analyze.
+11. To allow users to upload, view, replace, and remove entity images with automatic image optimization.
 
 ---
 
@@ -59,6 +60,13 @@ The main objective of the Digital Investigation and Link Analysis System is to p
 ### Case Management
 
 Users can create and manage investigation cases. Each case provides a separate workspace containing its own entities and relationships.
+
+**Operations:**
+
+- Create a case.
+- View and open an existing case.
+- Edit case information.
+- Delete a case.
 
 ### Entity Management
 
@@ -86,12 +94,13 @@ Examples include:
 - Cryptocurrency Wallet
 - Event
 
-The system supports:
+**Operations:**
 
-- Create Entity
-- View Entity
-- Edit Entity
-- Delete Entity
+- Create an entity.
+- View an entity and its properties.
+- Edit an entity.
+- Delete an entity.
+- Select an entity to inspect its details in the graph workspace.
 
 ### Relationship Management
 
@@ -112,15 +121,34 @@ Examples of relationship types include:
 
 Relationships contain a source entity, target entity, and relationship type.
 
+**Operations:**
+
+- Create a relationship between two entities.
+- View existing relationships.
+- Edit a relationship.
+- Delete a relationship.
+
 ### Graph Visualization
 
 The system converts investigation entities and relationships into a graph using NetworkX and displays the graph through the PyQt6 graphical interface.
 
 Nodes represent entities while edges represent relationships.
 
+**Operations:**
+
+- Open the graph for the current investigation case.
+- View entities as nodes and relationships as edges.
+- Zoom and navigate the graph.
+
 ### Entity Selection
 
 Users can select an entity from the graph to inspect its connections and investigation information.
+
+**Operations:**
+
+- Select a graph node.
+- View the selected entity's details and properties.
+- Inspect its displayed connections.
 
 ### Connection Highlighting
 
@@ -128,15 +156,46 @@ The system can highlight a selected entity and its direct connections while dimm
 
 This helps users focus on a specific part of the investigation graph.
 
+**Operations:**
+
+- Select an entity to highlight it and its directly connected entities.
+- Visually distinguish highlighted connections from unrelated graph elements.
+
 ### Path Analysis
 
 Users can select a source entity and a target entity and perform a path analysis.
 
 The system searches the investigation graph for a path between the two entities and displays the entities and relationships involved in the path.
 
+**Operations:**
+
+- Choose a starting entity.
+- Choose a target entity.
+- Run **Find Path**.
+- View the highlighted path and its details, or a message when no connection is found.
+
+### Entity Image Management
+
+Users can attach an optional image to an entity from the Entity Details panel in the graph workspace. The **Pillow** library validates, resizes, and compresses uploaded images before they are saved in SQLite.
+
+**Operations:**
+
+- Upload an image to the selected entity.
+- Automatically compress and optimize the uploaded image.
+- View its image preview in the Entity Details panel.
+- Replace an existing entity image.
+- Remove the image without deleting the entity.
+
 ### SQLite Data Storage
 
-Investigation cases, entities, and relationships are stored in an SQLite database, allowing data to persist between application sessions.
+Investigation cases, entities, relationships, and optimized entity images are stored in an SQLite database, allowing data to persist between application sessions.
+
+**Operations:**
+
+- Save new and updated investigation records.
+- Retrieve case, entity, relationship, and image data.
+- Delete records and remove stored images as requested.
+- Load saved data when the application is reopened.
 
 ---
 
@@ -161,6 +220,7 @@ SQLite is used for persistent storage of investigation cases, entities, and rela
 ### Other Libraries and Tools
 
 - **NetworkX** – Used to represent and analyze investigation graphs.
+- **Pillow (PIL)** – Used to validate, resize, and compress uploaded entity images.
 - **NumPy** – Required by NetworkX and related graph functionality.
 - **Qt Style Sheets (QSS)** – Used to style the application's graphical interface.
 - **UUID** – Used to generate unique identifiers for entities and relationships.
@@ -213,6 +273,9 @@ Digital-investigation-and-Link-Analysis-System/
 │   ├── entity_form.py
 │   ├── relation_form.py
 │   └── styles.qss
+│
+├── utils/
+│   └── image_processor.py
 │
 ├── data/
 │   └── investigation.db
@@ -270,6 +333,10 @@ Contains the graph-related components of the application.
 - `graph_node.py` – Represents graph nodes.
 - `graph_edge.py` – Represents graph relationships.
 
+#### `utils/`
+
+Contains `image_processor.py`, which processes and compresses entity images before they are stored in the database.
+
 #### `ui/`
 
 Contains the PyQt6 graphical user interface.
@@ -294,6 +361,7 @@ The system requires:
 - PyQt6
 - NetworkX
 - NumPy
+- Pillow
 
 ### 1. Clone the Repository
 
@@ -327,13 +395,27 @@ On Windows:
 .venv\Scripts\activate
 ```
 
-### 4. Install Dependencies
+### 4. Configure the Qt Platform for Your Operating System
 
-```bash
-pip install PyQt6 networkx numpy
+Open `main.py` and locate the Qt platform environment setting:
+
+```python
+os.environ["QT_QPA_PLATFORM"] = "xcb"
 ```
 
-### 5. Run the Application
+This setting selects the **XCB** platform plugin for Linux systems using X11. If you are running the application on **Windows**, change it to:
+
+```python
+os.environ["QT_QPA_PLATFORM"] = "windows"
+```
+
+### 5. Install Dependencies
+
+```bash
+pip install PyQt6 networkx numpy Pillow
+```
+
+### 6. Run the Application
 
 ```bash
 python main.py
@@ -348,7 +430,7 @@ Alternatively, when using the project's virtual environment directly:
 ### Dependency Installation Summary
 
 ```bash
-pip install PyQt6 networkx numpy
+pip install PyQt6 networkx numpy Pillow
 ```
 
 ---
@@ -423,7 +505,16 @@ Select an entity from the graph to inspect its information and connections.
 
 The system can highlight the selected entity and its directly connected entities.
 
-### Step 9: Perform Path Analysis
+### Step 9: Upload or Manage an Entity Image
+
+Select an entity in the **Graph** section to open its details on the right.
+
+- Click **Upload Image** and select an image file. Pillow automatically resizes and compresses it before saving.
+- The image is displayed in the Entity Details panel.
+- Click **Replace Image** to upload a different image.
+- Click **Remove Image** and confirm to delete the stored image without deleting the entity.
+
+### Step 10: Perform Path Analysis
 
 Use the **Start** and **Target** entity selectors.
 
@@ -603,47 +694,44 @@ The database stores information required by the investigation system and allows 
 
 ### Important Tables
 
+The tables below document the fields described by the application, including the new image storage field. Exact SQL data types and constraints should be checked against `database/database.py`.
+
 #### `cases`
 
 Stores investigation case information.
 
-Example fields include:
-
-```text
-case_id
-case_name
-description
-date_created
-```
+| Field | Description |
+|---|---|
+| `case_id` | Unique identifier of the investigation case. |
+| `case_name` | Name of the case. |
+| `description` | Description of the investigation. |
+| `date_created` | Date the case was created. |
 
 #### `entities`
 
 Stores entities associated with investigation cases.
 
-Example fields include:
-
-```text
-entity_id
-case_id
-entity_type
-label
-date_created
-properties
-```
+| Field | Description |
+|---|---|
+| `entity_id` | Unique identifier of the entity. |
+| `case_id` | Identifier of the case that contains the entity. |
+| `entity_type` | Category or type of the entity. |
+| `label` | Display name or label of the entity. |
+| `date_created` | Date the entity was created. |
+| `properties` | Additional entity-specific properties stored as JSON. |
+| `image_data` | Optional optimized image stored as a SQLite BLOB; `NULL` when no image is attached. |
 
 #### `relationships`
 
 Stores connections between entities.
 
-Example fields include:
-
-```text
-relation_id
-case_id
-relation_type
-source_id
-target_id
-```
+| Field | Description |
+|---|---|
+| `relation_id` | Unique identifier of the relationship. |
+| `case_id` | Identifier of the case to which the relationship belongs. |
+| `relation_type` | Type of connection between entities. |
+| `source_id` | Identifier of the source entity. |
+| `target_id` | Identifier of the target entity. |
 
 ### Database Relationships
 
@@ -707,9 +795,18 @@ Used to remove:
 
 #### Search / Retrieval
 
-The system retrieves entities and relationships based on the current investigation case and selected entity IDs.
+The system retrieves entities and relationships based on the current investigation case and selected entity IDs. Entity images are retrieved separately when needed for display.
 
 Path analysis also retrieves relationships between entities when displaying the resulting path.
+
+### Entity Image Storage Operations
+
+| Operation | Database action |
+|---|---|
+| Upload image | Save compressed image bytes to `entities.image_data`. |
+| View image | Read `image_data` for the selected entity. |
+| Replace image | Update `image_data` with a newly compressed image. |
+| Remove image | Set `image_data` to `NULL` without deleting the entity. |
 
 ---
 
@@ -924,6 +1021,17 @@ The system should inform the user that no path was found.
 The system displays a "No connection found" result.
 
 **Status:** Passed
+
+---
+
+### Additional Image Management Tests
+
+| Test | Action | Expected result |
+|---|---|---|
+| Upload image | Select an entity and upload an image. | A compressed image is saved and shown in the details panel. |
+| Replace image | Upload another image to the same entity. | The previous image is replaced. |
+| Remove image | Click **Remove Image** and confirm. | The preview clears while the entity remains intact. |
+| Persistence | Restart the application and reselect an entity with an image. | The stored image still appears. |
 
 ---
 
